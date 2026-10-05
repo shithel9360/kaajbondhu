@@ -64,9 +64,10 @@ export default function Home() {
                   placeholder="কোন সার্ভিসটি খুঁজছেন?" 
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
+                  onKeyDown={(e) => { if(e.key === "Enter") document.getElementById("services")?.scrollIntoView({ behavior: "smooth" }); }}
                   className="border-0 focus-visible:ring-0 text-lg h-14 bg-transparent dark:text-slate-50 shadow-none px-2 sm:px-0"
                 />
-                <Button className="h-14 px-6 sm:px-8 rounded-xl bg-slate-900 text-white hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-700 font-bold text-base sm:text-lg transition-transform active:scale-95 shrink-0">
+                <Button onClick={() => { document.getElementById("services")?.scrollIntoView({ behavior: "smooth" }); }} className="h-14 px-6 sm:px-8 rounded-xl bg-slate-900 text-white hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-700 font-bold text-base sm:text-lg transition-transform active:scale-95 shrink-0">
                   সার্চ করুন
                 </Button>
               </div>

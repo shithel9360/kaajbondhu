@@ -73,14 +73,14 @@ export default function ProviderApply() {
   if (profile && profile.status !== 'draft') {
     return (
       <div className=" animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out">
-        <Card className="shadow-sm border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+        <Card className="shadow-sm border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-50">
           <CardHeader>
             <CardTitle>আবেদন স্ট্যাটাস</CardTitle>
           </CardHeader>
           <CardContent>
-            {profile.status === 'pending_approval' && <p className="text-yellow-600 font-bold">আপনার আবেদনটি রিভিউ করা হচ্ছে।</p>}
-            {profile.status === 'approved' && <p className="text-green-600 font-bold">অভিনন্দন! আপনি এখন একজন ভেরিফাইড প্রোভাইডার।</p>}
-            {profile.status === 'rejected' && <p className="text-red-600 font-bold">আপনার আবেদনটি বাতিল করা হয়েছে। কারণ: {profile.rejection_reason}</p>}
+            {profile.status === 'pending_approval' && <p className="text-yellow-600 dark:text-yellow-500 font-bold">আপনার আবেদনটি রিভিউ করা হচ্ছে।</p>}
+            {profile.status === 'approved' && <p className="text-green-600 dark:text-green-400 font-bold">অভিনন্দন! আপনি এখন একজন ভেরিফাইড প্রোভাইডার।</p>}
+            {profile.status === 'rejected' && <p className="text-red-600 dark:text-red-400 font-bold">আপনার আবেদনটি বাতিল করা হয়েছে। কারণ: {profile.rejection_reason}</p>}
             <Button onClick={() => navigate('/dashboard')} className="mt-4">ড্যাশবোর্ডে ফিরে যান</Button>
           </CardContent>
         </Card>
@@ -90,7 +90,7 @@ export default function ProviderApply() {
 
   return (
     <div className=" animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out">
-      <Card className="shadow-sm border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+      <Card className="shadow-sm border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-50">
         <CardHeader>
           <CardTitle className="text-2xl">সার্ভিস প্রোভাইডার হিসেবে যোগ দিন</CardTitle>
           <CardDescription>
@@ -116,7 +116,7 @@ export default function ProviderApply() {
             </div>
 
             <div className="border-t pt-4 mt-4 space-y-4">
-              <h3 className="font-bold text-slate-700">জরুরি যোগাযোগ (Emergency Contact)</h3>
+              <h3 className="font-bold text-slate-900 dark:text-slate-50">জরুরি যোগাযোগ (Emergency Contact)</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="emergency_contact_name">নাম</Label>
