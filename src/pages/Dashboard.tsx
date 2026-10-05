@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
+import { Wallet, Briefcase, CalendarCheck } from 'lucide-react';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ export default function Dashboard() {
   const [role, setRole] = useState<string | null>(null);
   const [bookings, setBookings] = useState<any[]>([]);
   const [availableWork, setAvailableWork] = useState<any[]>([]);
+  const [stats, setStats] = useState({ income: 0, completed: 0 });
 
   useEffect(() => {
     fetchData();
@@ -54,8 +56,13 @@ export default function Dashboard() {
         .eq('provider_id', user.id);
       
       if (assignmentData) {
-        const activeBookings = assignmentData.map((a: any) => a.bookings);
+        const activeBookings = assignmentData.map((a: any) => a.bookings).sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
         setBookings(activeBookings);
+
+        // Calculate income (assuming 80% provider cut)
+        const completed = activeBookings.filter((b: any) => ['paid', 'review_pending', 'closed'].includes(b.status));
+        const totalIncome = completed.reduce((sum: number, b: any) => sum + (b.total_price * 0.8), 0);
+        setStats({ income: totalIncome, completed: completed.length });
       }
     }
   }
@@ -107,32 +114,62 @@ export default function Dashboard() {
   if (!user) return <div className="p-8 text-center">লোড হচ্ছে...</div>;
 
   return (
-    <div className="container mx-auto p-4 max-w-4xl mt-8">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl flex justify-between items-center">
-            ড্যাশবোর্ড
-            <Button variant="destructive" onClick={handleLogout} size="sm">
-              লগআউট
-            </Button>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div>
-            <p className="text-gray-600">স্বাগতম, <span className="font-semibold text-gray-900">{user.user_metadata?.full_name || user.email}</span></p>
-            <p className="text-sm text-gray-500">আপনার একাউন্টের ধরন: {role === 'customer' ? 'গ্রাহক' : role === 'provider' ? 'সার্ভিস প্রোভাইডার' : role === 'admin' ? 'অ্যাডমিন' : 'গ্রাহক'}</p>
+    <div className="container mx-auto p-4 max-w-5xl mt-8 mb-20">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">ড্যাশবোর্ড</h1>
+          <p className="text-gray-500 mt-1">স্বাগতম, {user.user_metadata?.full_name || user.email}</p>
+        </div>
+        <Button variant="outline" className="border-red-200 text-red-600 hover:bg-red-50" onClick={handleLogout}>
+          লগআউট করুন
+        </Button>
+      </div>
+
+      {role === 'provider' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          <Card className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white border-0 shadow-lg">
+            <CardContent className="p-6 flex items-center gap-4">
+              <div className="p-3 bg-white/20 rounded-full">
+                <Wallet className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <p className="text-indigo-100 font-medium">মোট আয়</p>
+                <h3 className="text-3xl font-bold">৳ {(stats.income / 100).toFixed(0)}</h3>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-white shadow-sm border-gray-100">
+            <CardContent className="p-6 flex items-center gap-4">
+              <div className="p-3 bg-green-100 rounded-full">
+                <Briefcase className="w-8 h-8 text-green-600" />
+              </div>
+              <div>
+                <p className="text-gray-500 font-medium">সম্পন্ন করা কাজ</p>
+                <h3 className="text-3xl font-bold text-gray-900">{stats.completed} টি</h3>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      <Card className="shadow-sm border-gray-100">
+        <CardContent className="p-6 space-y-6">
+          <div className="flex flex-wrap gap-2">
+            <span className="inline-flex items-center px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-sm font-medium border border-blue-100">
+              {role === 'customer' ? 'গ্রাহক একাউন্ট' : role === 'provider' ? 'সার্ভিস প্রোভাইডার একাউন্ট' : role === 'admin' ? 'অ্যাডমিন একাউন্ট' : 'একাউন্ট'}
+            </span>
             
             {role === 'admin' && (
               <Link to="/admin">
-                <Button variant="outline" className="mt-4 mr-2 text-red-600 border-red-600">
-                  অ্যাডমিন প্যানেল
+                <Button size="sm" variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
+                  অ্যাডমিন প্যানেলে যান
                 </Button>
               </Link>
             )}
             
             {role === 'customer' && (
               <Link to="/apply">
-                <Button variant="outline" className="mt-4 text-blue-600 border-blue-600">
+                <Button size="sm" variant="outline" className="text-indigo-600 border-indigo-200 hover:bg-indigo-50">
                   প্রোভাইডার হিসেবে কাজ করুন
                 </Button>
               </Link>
@@ -140,22 +177,27 @@ export default function Dashboard() {
           </div>
           
           {role === 'provider' && (
-            <div className="pt-4 border-t">
-              <h3 className="text-xl font-bold mb-4 text-green-700">নতুন কাজের সুযোগ</h3>
+            <div className="pt-6 border-t border-gray-100">
+              <div className="flex items-center gap-2 mb-4">
+                <CalendarCheck className="w-6 h-6 text-indigo-600" />
+                <h3 className="text-xl font-bold text-gray-900">নতুন কাজের সুযোগ</h3>
+              </div>
               {availableWork.length === 0 ? (
-                <p className="text-gray-500">এই মুহূর্তে কোনো নতুন কাজ নেই।</p>
+                <div className="p-8 text-center bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                  <p className="text-gray-500">এই মুহূর্তে আপনার এলাকায় কোনো নতুন কাজ নেই।</p>
+                </div>
               ) : (
-                <div className="space-y-4">
+                <div className="grid gap-4">
                   {availableWork.map(w => (
-                    <div key={w.id} className="border p-4 rounded-lg flex justify-between items-center bg-green-50">
-                      <div>
-                        <p className="font-bold text-lg">{w.services?.name}</p>
-                        <p className="text-sm text-gray-700">ঠিকানা: {w.address}</p>
-                        <p className="text-sm text-gray-700">সময়: {new Date(w.scheduled_at).toLocaleString('bn-BD')}</p>
+                    <div key={w.id} className="border border-indigo-100 p-5 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center bg-indigo-50/50 hover:bg-indigo-50 transition-colors">
+                      <div className="mb-4 md:mb-0">
+                        <p className="font-bold text-lg text-indigo-900">{w.services?.name}</p>
+                        <p className="text-sm text-gray-600 mt-1">📍 ঠিকানা: {w.address}</p>
+                        <p className="text-sm text-gray-600">🕒 সময়: {new Date(w.scheduled_at).toLocaleString('bn-BD')}</p>
                       </div>
-                      <div className="text-right">
-                        <p className="font-bold text-green-700 mb-2">৳ {(w.total_price / 100).toFixed(0)}</p>
-                        <Button onClick={() => acceptWork(w.id)} className="bg-green-600 hover:bg-green-700">কাজটি নিন</Button>
+                      <div className="text-right w-full md:w-auto flex flex-row md:flex-col justify-between items-center md:items-end">
+                        <p className="font-extrabold text-xl text-indigo-700 mb-2">৳ {(w.total_price / 100).toFixed(0)}</p>
+                        <Button onClick={() => acceptWork(w.id)} className="bg-indigo-600 hover:bg-indigo-700 w-full md:w-auto shadow-md">কাজটি গ্রহণ করুন</Button>
                       </div>
                     </div>
                   ))}
@@ -164,52 +206,50 @@ export default function Dashboard() {
             </div>
           )}
 
-          <div className="pt-4 border-t">
-            <h3 className="text-xl font-bold mb-4">{role === 'provider' ? 'আপনার চলমান কাজসমূহ' : 'আপনার বুকিং সমূহ'}</h3>
+          <div className="pt-6 border-t border-gray-100">
+            <h3 className="text-xl font-bold mb-4 text-gray-900">{role === 'provider' ? 'আপনার চলমান কাজসমূহ' : 'আপনার বুকিং সমূহ'}</h3>
             {bookings.length === 0 ? (
-              <div className="text-center py-8 bg-gray-50 rounded-lg">
+              <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-200">
                 <p className="text-gray-500 mb-4">আপনার কোনো {role === 'provider' ? 'কাজ' : 'বুকিং'} নেই।</p>
                 {role === 'customer' && (
                   <Link to="/">
-                    <Button>নতুন সার্ভিস বুক করুন</Button>
+                    <Button className="bg-indigo-600 hover:bg-indigo-700 shadow-md">নতুন সার্ভিস বুক করুন</Button>
                   </Link>
                 )}
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="grid gap-4">
                 {bookings.map(b => (
-                  <div key={b.id} className="border p-4 rounded-lg flex justify-between items-center bg-white shadow-sm">
-                    <div>
-                      <p className="font-bold text-lg text-blue-900">{b.services?.name}</p>
-                      <p className="text-sm text-gray-600">ঠিকানা: {b.address}</p>
-                      <p className="text-sm text-gray-600">সময়: {new Date(b.scheduled_at).toLocaleString('bn-BD')}</p>
-                      <div className="mt-2">
-                        <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold uppercase tracking-wider">
-                          {b.status.replace(/_/g, ' ')}
-                        </span>
-                      </div>
+                  <div key={b.id} className="border border-gray-100 p-5 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center bg-white shadow-sm hover:shadow-md transition-shadow">
+                    <div className="mb-4 md:mb-0">
+                      <p className="font-bold text-lg text-gray-900">{b.services?.name}</p>
+                      <p className="text-sm text-gray-600 mt-1">📍 ঠিকানা: {b.address}</p>
+                      <p className="text-sm text-gray-600 mb-3">🕒 সময়: {new Date(b.scheduled_at).toLocaleString('bn-BD')}</p>
+                      <span className="inline-block px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-bold uppercase tracking-wider border border-indigo-100">
+                        {b.status.replace(/_/g, ' ')}
+                      </span>
                     </div>
                     
-                    <div className="text-right flex flex-col items-end gap-2">
-                      <p className="font-bold text-xl text-gray-800">৳ {(b.total_price / 100).toFixed(0)}</p>
+                    <div className="text-left md:text-right flex flex-col items-start md:items-end gap-3 w-full md:w-auto">
+                      <p className="font-extrabold text-2xl text-gray-900">৳ {(b.total_price / 100).toFixed(0)}</p>
                       
                       {/* Provider Actions */}
                       {role === 'provider' && b.status === 'provider_selected' && (
-                        <Button size="sm" onClick={() => updateBookingStatus(b.id, 'in_progress')}>কাজ শুরু করুন</Button>
+                        <Button className="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 shadow-sm" onClick={() => updateBookingStatus(b.id, 'in_progress')}>কাজ শুরু করুন</Button>
                       )}
                       {role === 'provider' && b.status === 'in_progress' && (
-                        <Button size="sm" variant="outline" className="border-green-600 text-green-600" onClick={() => updateBookingStatus(b.id, 'completed')}>কাজ সম্পন্ন করুন</Button>
+                        <Button className="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white shadow-sm" onClick={() => updateBookingStatus(b.id, 'completed')}>কাজ সম্পন্ন করুন</Button>
                       )}
                       {role === 'provider' && b.status === 'completed' && (
-                        <Button size="sm" variant="secondary" onClick={() => updateBookingStatus(b.id, 'payment_pending')}>পেমেন্ট রিকোয়েস্ট পাঠান</Button>
+                        <Button className="w-full md:w-auto" variant="outline" onClick={() => updateBookingStatus(b.id, 'payment_pending')}>পেমেন্ট রিকোয়েস্ট পাঠান</Button>
                       )}
 
                       {/* Customer Actions */}
                       {role === 'customer' && b.status === 'payment_pending' && (
-                        <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handlePayment(b.id)}>পেমেন্ট করুন (AamarPay)</Button>
+                        <Button className="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 shadow-md" onClick={() => handlePayment(b.id)}>পেমেন্ট করুন (AamarPay)</Button>
                       )}
                       {role === 'customer' && b.status === 'paid' && (
-                        <Button size="sm" variant="outline" onClick={() => handleReview(b.id)}>রিভিউ দিন</Button>
+                        <Button className="w-full md:w-auto border-indigo-200 text-indigo-700 hover:bg-indigo-50" variant="outline" onClick={() => handleReview(b.id)}>রিভিউ দিন</Button>
                       )}
                     </div>
                   </div>
