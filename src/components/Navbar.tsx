@@ -82,7 +82,7 @@ export function Navbar() {
           {session ? (
             <Link to="/dashboard">
               <Button variant="outline" size="sm" className="font-semibold border-slate-200 dark:border-slate-700">
-                ড্যাশ
+                ড্যাশবোর্ড
               </Button>
             </Link>
           ) : (
