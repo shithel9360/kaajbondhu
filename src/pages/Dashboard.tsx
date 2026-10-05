@@ -120,6 +120,11 @@ export default function Dashboard() {
           <h1 className="text-3xl font-bold text-gray-900">ড্যাশবোর্ড</h1>
           <p className="text-gray-500 mt-1">স্বাগতম, {user.user_metadata?.full_name || user.email}</p>
         </div>
+          <Link to="/profile">
+          <Button variant="outline" className="mr-2 border-indigo-200 text-indigo-700 hover:bg-indigo-50">
+            আমার প্রোফাইল
+          </Button>
+        </Link>
         <Button variant="outline" className="border-red-200 text-red-600 hover:bg-red-50" onClick={handleLogout}>
           লগআউট করুন
         </Button>
@@ -192,7 +197,7 @@ export default function Dashboard() {
                     <div key={w.id} className="border border-indigo-100 p-5 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center bg-indigo-50/50 hover:bg-indigo-50 transition-colors">
                       <div className="mb-4 md:mb-0">
                         <p className="font-bold text-lg text-indigo-900">{w.services?.name}</p>
-                        <p className="text-sm text-gray-600 mt-1">📍 ঠিকানা: {w.address}</p>
+                        <p className="text-sm text-gray-600 mt-1">📍 ঠিকানা: <a href={`https://www.google.com/maps/search/?api=1&query=${w.lat},${w.lng}`} target="_blank" rel="noreferrer" className="text-indigo-500 hover:underline">{w.address}</a></p>
                         <p className="text-sm text-gray-600">🕒 সময়: {new Date(w.scheduled_at).toLocaleString('bn-BD')}</p>
                       </div>
                       <div className="text-right w-full md:w-auto flex flex-row md:flex-col justify-between items-center md:items-end">
@@ -223,7 +228,7 @@ export default function Dashboard() {
                   <div key={b.id} className="border border-gray-100 p-5 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center bg-white shadow-sm hover:shadow-md transition-shadow">
                     <div className="mb-4 md:mb-0">
                       <p className="font-bold text-lg text-gray-900">{b.services?.name}</p>
-                      <p className="text-sm text-gray-600 mt-1">📍 ঠিকানা: {b.address}</p>
+                      <p className="text-sm text-gray-600 mt-1">📍 ঠিকানা: <a href={`https://www.google.com/maps/search/?api=1&query=${b.lat},${b.lng}`} target="_blank" rel="noreferrer" className="text-indigo-500 hover:underline">{b.address}</a></p>
                       <p className="text-sm text-gray-600 mb-3">🕒 সময়: {new Date(b.scheduled_at).toLocaleString('bn-BD')}</p>
                       <span className="inline-block px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-bold uppercase tracking-wider border border-indigo-100">
                         {b.status.replace(/_/g, ' ')}
