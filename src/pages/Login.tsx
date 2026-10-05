@@ -45,7 +45,7 @@ export default function Login() {
                 type="email" 
                 placeholder="আপনার ইমেইল" 
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
                 required 
               />
             </div>
@@ -55,7 +55,7 @@ export default function Login() {
                 id="password" 
                 type="password" 
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                 required 
               />
             </div>

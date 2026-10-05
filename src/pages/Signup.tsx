@@ -56,7 +56,7 @@ export default function Signup() {
                 id="fullName" 
                 placeholder="যেমন: রহিম মিয়া" 
                 value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFullName(e.target.value)}
                 required 
               />
             </div>
@@ -67,7 +67,7 @@ export default function Signup() {
                 type="tel"
                 placeholder="01XXXXXXXXX" 
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPhone(e.target.value)}
                 required 
               />
             </div>
@@ -78,7 +78,7 @@ export default function Signup() {
                 type="email" 
                 placeholder="আপনার ইমেইল" 
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
                 required 
               />
             </div>
@@ -88,7 +88,7 @@ export default function Signup() {
                 id="password" 
                 type="password" 
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                 required 
                 minLength={6}
               />
