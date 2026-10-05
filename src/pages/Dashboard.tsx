@@ -12,57 +12,53 @@ export default function Dashboard() {
   const [availableWork, setAvailableWork] = useState<any[]>([]);
 
   useEffect(() => {
-    async function getUser() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        navigate('/login');
-        return;
-      }
-      setUser(user);
+    fetchData();
+  }, [navigate]);
 
-      // Fetch user role
-      const { data: roleData } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .single();
+  async function fetchData() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    setUser(user);
+
+    const { data: roleData } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .single();
+    
+    const userRole = roleData ? roleData.role : 'customer';
+    setRole(userRole);
+
+    if (userRole === 'customer') {
+      const { data: bookingsData } = await supabase
+        .from('bookings')
+        .select(`*, services ( name, base_price )`)
+        .eq('customer_id', user.id)
+        .order('created_at', { ascending: false });
+      if (bookingsData) setBookings(bookingsData);
+    } 
+    else if (userRole === 'provider') {
+      const { data: workData } = await supabase
+        .from('bookings')
+        .select(`*, services ( name, base_price )`)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+      if (workData) setAvailableWork(workData);
       
-      const userRole = roleData ? roleData.role : 'customer';
-      setRole(userRole);
-
-      if (userRole === 'customer') {
-        // Fetch customer bookings
-        const { data: bookingsData } = await supabase
-          .from('bookings')
-          .select(`*, services ( name, base_price )`)
-          .eq('customer_id', user.id)
-          .order('created_at', { ascending: false });
-        if (bookingsData) setBookings(bookingsData);
-      } 
-      else if (userRole === 'provider') {
-        // Fetch available work (pending bookings)
-        const { data: workData } = await supabase
-          .from('bookings')
-          .select(`*, services ( name, base_price )`)
-          .eq('status', 'pending')
-          .order('created_at', { ascending: false });
-        if (workData) setAvailableWork(workData);
-        
-        // Fetch provider's active assignments
-        const { data: assignmentData } = await supabase
-          .from('assignments')
-          .select(`*, bookings (*, services ( name, base_price ))`)
-          .eq('provider_id', user.id);
-        
-        if (assignmentData) {
-          // map to same format as bookings for simple rendering
-          const activeBookings = assignmentData.map((a: any) => a.bookings);
-          setBookings(activeBookings);
-        }
+      const { data: assignmentData } = await supabase
+        .from('assignments')
+        .select(`*, bookings (*, services ( name, base_price ))`)
+        .eq('provider_id', user.id);
+      
+      if (assignmentData) {
+        const activeBookings = assignmentData.map((a: any) => a.bookings);
+        setBookings(activeBookings);
       }
     }
-    getUser();
-  }, [navigate]);
+  }
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -70,7 +66,6 @@ export default function Dashboard() {
   };
 
   const acceptWork = async (bookingId: string) => {
-    // Upsert assignment and change booking status
     const { error: err1 } = await supabase.from('assignments').insert({
       booking_id: bookingId,
       provider_id: user.id,
@@ -78,11 +73,34 @@ export default function Dashboard() {
     });
     
     if (!err1) {
-      await supabase.from('bookings').update({ status: 'provider_selected' }).eq('id', bookingId);
-      alert('কাজটি আপনি গ্রহণ করেছেন!');
-      window.location.reload();
+      await updateBookingStatus(bookingId, 'provider_selected');
     } else {
       alert('দুঃখিত, কাজটি গ্রহণ করা সম্ভব হয়নি: ' + err1.message);
+    }
+  };
+
+  const updateBookingStatus = async (id: string, newStatus: string) => {
+    const { error } = await supabase.from('bookings').update({ status: newStatus }).eq('id', id);
+    if (!error) {
+      fetchData();
+    } else {
+      alert('Error updating status: ' + error.message);
+    }
+  };
+
+  const handlePayment = async (id: string) => {
+    alert('AamarPay পেমেন্ট গেটওয়েতে রিডাইরেক্ট করা হচ্ছে... (Dummy)');
+    setTimeout(() => {
+      alert('পেমেন্ট সফল হয়েছে!');
+      updateBookingStatus(id, 'paid');
+    }, 1500);
+  };
+
+  const handleReview = async (id: string) => {
+    const review = prompt('সার্ভিসটি কেমন লাগলো? রেটিং (১-৫) এবং মন্তব্য লিখুন:');
+    if (review) {
+      alert('রিভিউ জমা দেওয়ার জন্য ধন্যবাদ!');
+      updateBookingStatus(id, 'closed');
     }
   };
 
@@ -160,17 +178,39 @@ export default function Dashboard() {
             ) : (
               <div className="space-y-4">
                 {bookings.map(b => (
-                  <div key={b.id} className="border p-4 rounded-lg flex justify-between items-center">
+                  <div key={b.id} className="border p-4 rounded-lg flex justify-between items-center bg-white shadow-sm">
                     <div>
-                      <p className="font-bold text-lg">{b.services?.name}</p>
-                      <p className="text-sm text-gray-500">ঠিকানা: {b.address}</p>
-                      <p className="text-sm text-gray-500">সময়: {new Date(b.scheduled_at).toLocaleString('bn-BD')}</p>
+                      <p className="font-bold text-lg text-blue-900">{b.services?.name}</p>
+                      <p className="text-sm text-gray-600">ঠিকানা: {b.address}</p>
+                      <p className="text-sm text-gray-600">সময়: {new Date(b.scheduled_at).toLocaleString('bn-BD')}</p>
+                      <div className="mt-2">
+                        <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold uppercase tracking-wider">
+                          {b.status.replace(/_/g, ' ')}
+                        </span>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold mb-2 capitalize">
-                        {b.status.replace(/_/g, ' ')}
-                      </span>
-                      <p className="font-bold text-gray-700">৳ {(b.total_price / 100).toFixed(0)}</p>
+                    
+                    <div className="text-right flex flex-col items-end gap-2">
+                      <p className="font-bold text-xl text-gray-800">৳ {(b.total_price / 100).toFixed(0)}</p>
+                      
+                      {/* Provider Actions */}
+                      {role === 'provider' && b.status === 'provider_selected' && (
+                        <Button size="sm" onClick={() => updateBookingStatus(b.id, 'in_progress')}>কাজ শুরু করুন</Button>
+                      )}
+                      {role === 'provider' && b.status === 'in_progress' && (
+                        <Button size="sm" variant="outline" className="border-green-600 text-green-600" onClick={() => updateBookingStatus(b.id, 'completed')}>কাজ সম্পন্ন করুন</Button>
+                      )}
+                      {role === 'provider' && b.status === 'completed' && (
+                        <Button size="sm" variant="secondary" onClick={() => updateBookingStatus(b.id, 'payment_pending')}>পেমেন্ট রিকোয়েস্ট পাঠান</Button>
+                      )}
+
+                      {/* Customer Actions */}
+                      {role === 'customer' && b.status === 'payment_pending' && (
+                        <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handlePayment(b.id)}>পেমেন্ট করুন (AamarPay)</Button>
+                      )}
+                      {role === 'customer' && b.status === 'paid' && (
+                        <Button size="sm" variant="outline" onClick={() => handleReview(b.id)}>রিভিউ দিন</Button>
+                      )}
                     </div>
                   </div>
                 ))}
