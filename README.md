@@ -2,103 +2,88 @@
 
 KaajBondhu is a Bangladesh-first, premium on-demand local service marketplace MVP. It connects customers with verified professionals for home services (AC repair, cleaning, plumbing, etc.) through a seamless, highly optimized, and robust platform.
 
-![KaajBondhu Preview](https://via.placeholder.com/1200x600.png?text=KaajBondhu+-+Home+Services)
+## ✨ Core Architecture & Security Model
 
-## ✨ Core Features
+The project strictly follows the **PRD Requirements** focusing on correctness, security, and an API-first monolithic design. 
 
-### 👤 For Customers
-- **Interactive Booking:** Pick precise service locations using a fully free, integrated interactive map (Leaflet + OpenStreetMap).
-- **Special Offers & Bundles:** Real-time discount calculations and competitive BD market pricing.
-- **Service Lifecycle:** Track bookings from `pending` -> `in_progress` -> `completed` -> `paid`.
-- **User Profiles:** Manage personal information effortlessly.
+### 🔒 Security Model & Database
+- **Thick DB, Thin Client:** All business logic lives in PostgreSQL. The frontend is fully decoupled and untrusted.
+- **Strict Role-Based Access (RBAC):** `user_roles` acts as the single source of truth. `has_role()` is an explicitly secured RPC function (`SECURITY DEFINER SET search_path = public`).
+- **Row Level Security (RLS):** Enabled universally. Providers cannot read other providers' data. Customers cannot view internal platform configurations.
+- **Provider Privacy:** Customers' exact addresses and phone numbers are hidden via UI logic prior to job acceptance, mitigating data scraping. 
 
-### 🛠️ For Providers
-- **Dedicated Dashboard:** Track total earnings (80% provider cut) and completed jobs.
-- **Job Assignment:** View new jobs available in the local zone and accept them with one click.
-- **Smart Navigation:** Direct Google Maps links to customer locations.
-- **Onboarding Wizard:** Secure onboarding and NID verification workflow.
+### 🔄 Booking Lifecycle
+Strict adherence to the PRD state machine via atomic transactions.
+1. `pending`
+2. `matching`
+3. `accepted` (Provider assignment locks via atomic row update preventing race conditions)
+4. `ongoing` (Triggered ONLY by 4-digit expiring server-generated OTP validation)
+5. `completed` (Triggers server-side ledger calculations and locks fees)
 
-### 👑 For Admins
-- **Operational Console:** View total platform bookings, total active providers, and calculate platform income (20% commission).
-- **Approval Workflow:** Approve or reject new provider applications.
-- **Enterprise Architecture:** Built-in tables for Audit Logs, Financial Ledger, Disputes, and Quotes.
+*Note: `payment_status` is modeled completely independently as `pending`, `authorized`, `paid`, `failed`, or `refunded`.*
+
+### 💰 Financial Engine
+- **Append-Only Ledger:** `financial_ledger` is immutable. Server-side RPC calculates the platform commission upon booking completion and securely inserts locked entries (`platform_commission`, `provider_payable`).
+- **Dynamic Commission:** Removed hardcoded 20% calculations from the UI. Server computes dynamic fractions.
+- **Data Integrity:** Pricing operates strictly in **Poisha** integers (1 BDT = 100 Poisha) completely bypassing IEEE 754 float rounding bugs. 
 
 ## 🛠️ Technology Stack
 
 **Frontend:**
-- [React 18](https://reactjs.org/) + [Vite 8](https://vitejs.dev/)
-- [Tailwind CSS v4](https://tailwindcss.com/)
-- [shadcn/ui](https://ui.shadcn.com/) + Lucide Icons
-- [React Router v7](https://reactrouter.com/)
-- [React Leaflet](https://react-leaflet.js.org/) (OpenStreetMap)
+- React 18 + Vite 8
+- Tailwind CSS v4 + shadcn/ui
+- React Router v7
+- React Leaflet (OpenStreetMap integration for 100% free coordinate-based locations)
 
-**Backend & Database:**
-- [Supabase](https://supabase.com/) (PostgreSQL, Auth, RLS)
-- Row Level Security (RLS) & Secure Postgres RPCs
-
-## ⚙️ Enterprise Architecture
-
-KaajBondhu is built as an **API-first modular monolith**. The backend is completely decoupled from the UI, ensuring 100% readiness for future iOS and Android applications. 
-- **Append-Only Financial Ledger:** Immutable transaction records.
-- **Booking Status History:** Audit trail for all state transitions.
-- **Server-Side OTP:** Secure OTP generation at the database level.
-- **Strict Authorization:** Server-enforced role-based access control (RBAC).
+**Backend:**
+- Supabase (PostgreSQL 15, Auth, PostgREST)
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 - Node.js (v18+)
-- npm or yarn
-- Supabase Project (for DB and Auth)
+- Supabase Project & CLI
 
-### Installation
+### Installation & Deployment
 
 1. **Clone the repository:**
    ```bash
    git clone https://github.com/yourusername/kaajbondhu.git
    cd kaajbondhu
-   ```
-
-2. **Install dependencies:**
-   ```bash
    npm install
    ```
 
-3. **Environment Setup:**
-   Create a `.env.local` file in the root directory and add your Supabase credentials:
+2. **Environment Variables:**
+   Create `.env.local`:
    ```env
    VITE_SUPABASE_URL=your_supabase_url
    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
    ```
 
-4. **Run the development server:**
+3. **Run the Database Migrations:**
+   ```bash
+   supabase migration up
+   ```
+   **Migrations Map:**
+   - `00001` - Auth & Roles
+   - `00002` - Catalog & Bookings
+   - `00003` - Initial PRD Seed Data
+   - `00004` - Provider KYC Logic
+   - `00005` - Offers & Pricing Logic
+   - `00006` - Map Coordinates
+   - `00007` - Enterprise Scaffolding (Ledger, Quotes, Disputes)
+   - `00008` - PRD Strict Compliance (Concurrency, Security, OTP, Enums)
+
+4. **Run Locally:**
    ```bash
    npm run dev
    ```
 
-### Database Setup
+## 🧪 Testing Scope
+- **Concurrency:** `accept_booking` RPC relies on `FOR UPDATE` preventing double-assignment.
+- **OTP Tampering:** OTP strings reside in private DB columns; `verify_booking_otp` strictly limits state transitions.
+- **Financial Hacking:** Frontend price mutations are ignored during `complete_booking`.
 
-The database schema is managed via Supabase Migrations. Ensure you have the Supabase CLI installed.
-
-Run the following command to apply all migrations to your linked Supabase project:
-```bash
-supabase migration up
-```
-
-**Migrations Included:**
-- `00001_core_schema.sql` - Auth, Roles, Profiles, Markets
-- `00002_catalog_and_bookings.sql` - Categories, Services, Bookings, Assignments
-- `00003_seed_data.sql` - Dummy initial services and categories
-- `00004_provider_profiles.sql` - Provider KYC, Onboarding, and Approval RPCs
-- `00005_offers_and_pricing.sql` - Discount columns and BD Market pricing
-- `00006_location_coordinates.sql` - Latitude/Longitude for Map Integration
-- `00007_enterprise_architecture.sql` - Financial Ledger, Audit Logs, Quotes, Disputes, Messages, OTP
-
-## 🛡️ Security
-
-- **Row Level Security (RLS):** Enabled on all tables. Users can only access their own data.
-- **Admin Verification:** Admin roles cannot be assigned from the client. They are securely verified via database triggers.
-
-## 📄 License
-
-This project is proprietary and built specifically for the KaajBondhu platform.
+## ⚠️ Known Limitations (MVP Scope)
+- Storage access policies (e.g., NID uploads) currently rely on bucket configuration (not detailed in migrations).
+- "AamarPay" integration is implemented as a functional mock; requires production webhook handler via Supabase Edge Functions before going live.

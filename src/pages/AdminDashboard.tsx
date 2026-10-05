@@ -50,12 +50,13 @@ export default function AdminDashboard() {
     const { count: pCount } = await supabase.from('provider_profiles').select('*', { count: 'exact' }).eq('status', 'approved');
     
     // Calculate platform income (20% of all paid/completed bookings)
-    const { data: paidBookings } = await supabase
+    await supabase
       .from('bookings')
       .select('total_price')
       .in('status', ['paid', 'review_pending', 'closed']);
       
-    const income = paidBookings?.reduce((sum, b) => sum + (b.total_price * 0.20), 0) || 0;
+    const { data: ledger } = await supabase.from('financial_ledger').select('amount_poisha').eq('type', 'platform_commission');
+    const income = ledger?.reduce((sum, row) => sum + row.amount_poisha, 0) || 0;
 
     setStats({
       totalBookings: bCount || 0,
