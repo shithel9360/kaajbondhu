@@ -1,89 +1,114 @@
-# 🚀 KaajBondhu (কাজবন্ধু)
+# 🚀 কাজবন্ধু (KaajBondhu)
 
-KaajBondhu is a Bangladesh-first, premium on-demand local service marketplace MVP. It connects customers with verified professionals for home services (AC repair, cleaning, plumbing, etc.) through a seamless, highly optimized, and robust platform.
+KaajBondhu is a premium, Bangladesh-first local service marketplace connecting customers with verified professionals (Providers/Mistry) for everyday tasks.
 
-## ✨ Core Architecture & Security Model
+This repository contains the complete MVP Web Application.
 
-The project strictly follows the **PRD Requirements** focusing on correctness, security, and an API-first monolithic design. 
+---
 
-### 🔒 Security Model & Database
-- **Thick DB, Thin Client:** All business logic lives in PostgreSQL. The frontend is fully decoupled and untrusted.
-- **Strict Role-Based Access (RBAC):** `user_roles` acts as the single source of truth. `has_role()` is an explicitly secured RPC function (`SECURITY DEFINER SET search_path = public`).
-- **Row Level Security (RLS):** Enabled universally. Providers cannot read other providers' data. Customers cannot view internal platform configurations.
-- **Provider Privacy:** Customers' exact addresses and phone numbers are hidden via UI logic prior to job acceptance, mitigating data scraping. 
+## 🏗 Architecture & Tech Stack
 
-### 🔄 Booking Lifecycle
-Strict adherence to the PRD state machine via atomic transactions.
-1. `pending`
-2. `matching`
-3. `accepted` (Provider assignment locks via atomic row update preventing race conditions)
-4. `ongoing` (Triggered ONLY by 4-digit expiring server-generated OTP validation)
-5. `completed` (Triggers server-side ledger calculations and locks fees)
+- **Frontend Hosting:** Vercel (SPA fallback configured via `vercel.json`).
+- **Frontend Framework:** React 18, Vite, TypeScript.
+- **Styling & UI:** Tailwind CSS v4, shadcn/ui, Lucide Icons.
+- **State Management:** React hooks + Supabase Realtime/Fetch.
+- **Map & Geolocation:** Leaflet + OpenStreetMap (100% Free, Zero Google Maps billing required).
+- **Backend & Database:** Supabase (PostgreSQL 15).
+- **Authentication:** Supabase Auth (Email/Password).
+- **Security Logic:** PostgreSQL Row Level Security (RLS) + Edge Functions / RPCs.
 
-*Note: `payment_status` is modeled completely independently as `pending`, `authorized`, `paid`, `failed`, or `refunded`.*
+---
 
-### 💰 Financial Engine
-- **Append-Only Ledger:** `financial_ledger` is immutable. Server-side RPC calculates the platform commission upon booking completion and securely inserts locked entries (`platform_commission`, `provider_payable`).
-- **Dynamic Commission:** Removed hardcoded 20% calculations from the UI. Server computes dynamic fractions.
-- **Data Integrity:** Pricing operates strictly in **Poisha** integers (1 BDT = 100 Poisha) completely bypassing IEEE 754 float rounding bugs. 
+## 🔒 Security & Credential Rotation
 
-## 🛠️ Technology Stack
+**⚠️ CRITICAL SECURITY WARNING:**
+A legacy database password was previously exposed in historical development logs.
+> **You MUST rotate your Supabase database password in the Supabase Cloud Console prior to public production launch.**
 
-**Frontend:**
-- React 18 + Vite 8
-- Tailwind CSS v4 + shadcn/ui
-- React Router v7
-- React Leaflet (OpenStreetMap integration for 100% free coordinate-based locations)
+### Environment Variables
+**Never** put backend secrets in the browser bundle. Only the following safe, public-facing variables should be configured in your Vercel Production Environment (and `.env.local`):
+```env
+VITE_SUPABASE_URL=https://your-project-id.supabase.co
+VITE_SUPABASE_ANON_KEY=your-safe-anon-key
+```
 
-**Backend:**
-- Supabase (PostgreSQL 15, Auth, PostgREST)
+### Authorization & RLS
+- **Authentication:** Handled entirely by Supabase Auth.
+- **Role Model:** Defined securely in `public.user_roles` (`admin`, `customer`, `provider`). 
+- **Row Level Security (RLS):** All tables are protected.
+  - Customers can only read their own bookings.
+  - Providers can only see jobs they are assigned to, or public `pending` jobs.
+  - Profile visibility is restricted appropriately.
+- **RPCs:** Critical financial logic (e.g., `accept_booking`, `verify_booking_otp`, `complete_booking`) runs under `SECURITY DEFINER` with fixed `search_path = public` to ensure the client browser cannot manipulate financial outcomes or state transitions.
 
-## 🚀 Getting Started
+### Storage Security
+Provider KYC documents (NID) and portfolio images are uploaded to Supabase Storage.
+> **Action Required:** Ensure you manually set your Supabase Storage buckets to "Private" for KYC documents in the Supabase Dashboard, applying RLS so only Admins can read them.
 
-### Prerequisites
-- Node.js (v18+)
-- Supabase Project & CLI
+---
 
-### Installation & Deployment
+## 💸 Booking Lifecycle & Matching
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/yourusername/kaajbondhu.git
-   cd kaajbondhu
-   npm install
-   ```
+The booking lifecycle strictly adheres to the PRD:
+`pending` → `matching` → `accepted` → `ongoing` → `completed`
 
-2. **Environment Variables:**
-   Create `.env.local`:
-   ```env
-   VITE_SUPABASE_URL=your_supabase_url
-   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-   ```
+Payment state is entirely decoupled from the booking state:
+`pending` → `authorized` → `paid` → `failed` → `refunded`
 
-3. **Run the Database Migrations:**
-   ```bash
-   supabase migration up
-   ```
-   **Migrations Map:**
-   - `00001` - Auth & Roles
-   - `00002` - Catalog & Bookings
-   - `00003` - Initial PRD Seed Data
-   - `00004` - Provider KYC Logic
-   - `00005` - Offers & Pricing Logic
-   - `00006` - Map Coordinates
-   - `00007` - Enterprise Scaffolding (Ledger, Quotes, Disputes)
-   - `00008` - PRD Strict Compliance (Concurrency, Security, OTP, Enums)
+### Provider Matching & Idempotency
+- **Atomic Acceptance:** Providers accept jobs via the `accept_booking` RPC. This uses PostgreSQL `FOR UPDATE` row-level locks. If two providers tap "Accept" on the exact same millisecond, exactly one will succeed.
+- **OTP Security:** When a provider accepts, the server securely generates a single-use, 15-minute expiring 4-digit OTP. The job cannot transition to `ongoing` unless the customer physically reads the OTP to the provider, preventing phantom starts.
 
-4. **Run Locally:**
-   ```bash
-   npm run dev
-   ```
+### Financial Ledger
+- **Append-Only:** Once a job is completed, the RPC dynamically calculates any platform commission and inserts immutable, append-only records into `financial_ledger`.
+- No client-side mathematics are trusted.
 
-## 🧪 Testing Scope
-- **Concurrency:** `accept_booking` RPC relies on `FOR UPDATE` preventing double-assignment.
-- **OTP Tampering:** OTP strings reside in private DB columns; `verify_booking_otp` strictly limits state transitions.
-- **Financial Hacking:** Frontend price mutations are ignored during `complete_booking`.
+---
 
-## ⚠️ Known Limitations (MVP Scope)
-- Storage access policies (e.g., NID uploads) currently rely on bucket configuration (not detailed in migrations).
-- "AamarPay" integration is implemented as a functional mock; requires production webhook handler via Supabase Edge Functions before going live.
+## 🎨 UI/UX & Theming
+
+The application features a strict, highly polished Design System:
+- **Pricing Uniformity:** A single `PriceDisplay` component renders all prices. All values are stored as integers (Poisha) in the database and formatted consistently.
+- **Dark/Light Mode:** Full WCAG 2.1 AA compliant Dark Mode using strict Tailwind `slate/blue/amber` mappings. Prevented hydration flash via a blocking script in `index.html`.
+- **Responsive:** Layout scales fluidly from 320px (Small Mobile) to 1920px (Desktop), converting tables to horizontal scroll-wrappers on mobile devices.
+
+---
+
+## 🛠 Admin CMS Management
+
+The Admin Dashboard provides a real-time CMS allowing administrators to dynamically manage operations without modifying frontend source code.
+
+### How to add a new "Mistry" service:
+1. Log in as an Admin.
+2. Navigate to the **Admin Dashboard** (`/admin`).
+3. Under the **Service Management (CMS)** section, click **"নতুন সার্ভিস যোগ করুন"** (Add New Service).
+4. Fill out the form:
+   - **Name:** "Mistry (মিস্ত্রি)"
+   - **Category:** Select the appropriate parent category.
+   - **Description:** Enter the service details.
+   - **Base Price:** Enter the base booking price.
+5. Click **Save**. 
+6. *Result:* The service instantly populates globally on the Landing Page, Search, and Booking flows using the centralized `PriceDisplay` logic.
+
+### Modifying Historical Prices
+If an Admin updates the base price of "AC Servicing" from ৳500 to ৳600, all *future* bookings will reflect ৳600. *Historical* bookings are safely preserved since the actual price was copied to `bookings.total_price` at the moment of checkout.
+
+---
+
+## 💳 Payments (Demo Notice)
+
+Currently, the AamarPay checkout button is configured as a **DEMO/TEST ONLY** simulation. 
+Before processing real BDT transactions, you must replace the simulated `setTimeout` in `Dashboard.tsx` with a real AamarPay API initialization, and set up a Supabase Edge Function to securely handle the AamarPay Server-to-Server Webhook.
+
+---
+
+## 📦 Deployment Instructions
+
+1. Push all code to your GitHub Repository.
+2. Connect the repository to **Vercel**.
+3. Select **Vite** as the framework.
+4. Add the Environment Variables:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+5. Deploy.
+6. Verify your Vercel Domain is added to Supabase Auth -> URL Configuration -> Redirect URLs.
