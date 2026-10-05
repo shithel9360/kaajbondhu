@@ -4,6 +4,8 @@ import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import Home from './pages/Home';
 import BookService from './pages/BookService';
+import ProviderApply from './pages/ProviderApply';
+import AdminDashboard from './pages/AdminDashboard';
 import { Button } from './components/ui/button';
 import { Link } from 'react-router-dom';
 
@@ -24,6 +26,8 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/book/:id" element={<BookService />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/apply" element={<ProviderApply />} />
+            <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
           </Routes>
