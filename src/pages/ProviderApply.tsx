@@ -101,34 +101,34 @@ export default function ProviderApply() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="nid_number">জাতীয় পরিচয়পত্র (NID) নম্বর</Label>
-              <Input required id="nid_number" value={formData.nid_number} onChange={handleChange} />
+              <Input className="dark:bg-slate-900 dark:border-slate-700 dark:text-slate-50" required id="nid_number" value={formData.nid_number} onChange={handleChange} />
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="present_address">বর্তমান ঠিকানা</Label>
-                <Input required id="present_address" value={formData.present_address} onChange={handleChange} />
+                <Input className="dark:bg-slate-900 dark:border-slate-700 dark:text-slate-50" required id="present_address" value={formData.present_address} onChange={handleChange} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="permanent_address">স্থায়ী ঠিকানা</Label>
-                <Input required id="permanent_address" value={formData.permanent_address} onChange={handleChange} />
+                <Input className="dark:bg-slate-900 dark:border-slate-700 dark:text-slate-50" required id="permanent_address" value={formData.permanent_address} onChange={handleChange} />
               </div>
             </div>
 
             <div className="border-t pt-4 mt-4 space-y-4">
-              <h3 className="font-bold text-gray-700">জরুরি যোগাযোগ (Emergency Contact)</h3>
+              <h3 className="font-bold text-slate-700">জরুরি যোগাযোগ (Emergency Contact)</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="emergency_contact_name">নাম</Label>
-                  <Input required id="emergency_contact_name" value={formData.emergency_contact_name} onChange={handleChange} />
+                  <Input className="dark:bg-slate-900 dark:border-slate-700 dark:text-slate-50" required id="emergency_contact_name" value={formData.emergency_contact_name} onChange={handleChange} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="emergency_contact_phone">ফোন</Label>
-                  <Input required id="emergency_contact_phone" type="tel" value={formData.emergency_contact_phone} onChange={handleChange} />
+                  <Input className="dark:bg-slate-900 dark:border-slate-700 dark:text-slate-50" required id="emergency_contact_phone" type="tel" value={formData.emergency_contact_phone} onChange={handleChange} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="emergency_contact_relation">সম্পর্ক</Label>
-                  <Input required id="emergency_contact_relation" placeholder="যেমন: ভাই/বাবা" value={formData.emergency_contact_relation} onChange={handleChange} />
+                  <Input className="dark:bg-slate-900 dark:border-slate-700 dark:text-slate-50" required id="emergency_contact_relation" placeholder="যেমন: ভাই/বাবা" value={formData.emergency_contact_relation} onChange={handleChange} />
                 </div>
               </div>
             </div>

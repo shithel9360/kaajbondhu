@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Users, Activity, Wallet, Plus } from 'lucide-react';
+import { formatBDT } from '@/components/ui/PriceDisplay';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -116,81 +117,81 @@ export default function AdminDashboard() {
     }
   };
 
-  if (loading) return <div className="p-12 text-center text-gray-500">লোড হচ্ছে...</div>;
+  if (loading) return <div className="p-12 text-center text-slate-500">লোড হচ্ছে...</div>;
   if (!isAdmin) return null;
 
   return (
     <div className="container mx-auto p-4 max-w-6xl mt-8 mb-20 space-y-10">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white flex items-center gap-3">
+        <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white flex items-center gap-3">
           <div className="w-4 h-8 bg-red-600 rounded-sm"></div>
           অ্যাডমিন কন্ট্রোল প্যানেল
         </h1>
-        <Button onClick={() => navigate('/dashboard')} variant="outline" className="dark:border-gray-700 dark:text-gray-300">
+        <Button onClick={() => navigate('/dashboard')} variant="outline" className="dark:border-slate-700 dark:text-slate-300">
           মূল ড্যাশবোর্ডে যান
         </Button>
       </div>
       
       {/* Platform Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm border-t-4 border-blue-500">
+        <Card className="bg-white dark:bg-slate-800 border-0 shadow-sm border-t-4 border-blue-500">
           <CardContent className="p-6 flex items-center gap-4">
             <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-full">
               <Activity className="w-8 h-8 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <p className="text-gray-500 dark:text-gray-400 font-medium">সর্বমোট বুকিং</p>
-              <h3 className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalBookings}</h3>
+              <p className="text-slate-500 dark:text-slate-400 font-medium">সর্বমোট বুকিং</p>
+              <h3 className="text-3xl font-bold text-slate-900 dark:text-white">{stats.totalBookings}</h3>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm border-t-4 border-green-500">
+        <Card className="bg-white dark:bg-slate-800 border-0 shadow-sm border-t-4 border-green-500">
           <CardContent className="p-6 flex items-center gap-4">
             <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-full">
               <Wallet className="w-8 h-8 text-green-600 dark:text-green-400" />
             </div>
             <div>
-              <p className="text-gray-500 dark:text-gray-400 font-medium">প্লাটফর্মের আয়</p>
-              <h3 className="text-3xl font-bold text-gray-900 dark:text-white">৳ {(stats.platformIncome / 100).toFixed(0)}</h3>
+              <p className="text-slate-500 dark:text-slate-400 font-medium">প্লাটফর্মের আয়</p>
+              <h3 className="text-3xl font-bold text-slate-900 dark:text-white">{formatBDT(stats.platformIncome)}</h3>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm border-t-4 border-orange-500">
+        <Card className="bg-white dark:bg-slate-800 border-0 shadow-sm border-t-4 border-orange-500">
           <CardContent className="p-6 flex items-center gap-4">
             <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-full">
               <Users className="w-8 h-8 text-orange-600 dark:text-orange-400" />
             </div>
             <div>
-              <p className="text-gray-500 dark:text-gray-400 font-medium">অ্যাক্টিভ প্রোভাইডার</p>
-              <h3 className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalProviders}</h3>
+              <p className="text-slate-500 dark:text-slate-400 font-medium">অ্যাক্টিভ প্রোভাইডার</p>
+              <h3 className="text-3xl font-bold text-slate-900 dark:text-white">{stats.totalProviders}</h3>
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Provider Applications */}
-      <Card className="border-0 shadow-lg dark:bg-gray-800">
-        <CardHeader className="bg-gray-50 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700 pb-4">
+      <Card className="border-0 shadow-lg dark:bg-slate-800">
+        <CardHeader className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 pb-4">
           <CardTitle className="text-xl dark:text-white">পেন্ডিং প্রোভাইডার অ্যাপ্লিকেশন ({providers.length})</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {providers.length === 0 ? (
             <div className="p-12 text-center">
-              <p className="text-gray-500">কোনো নতুন অ্যাপ্লিকেশন নেই।</p>
+              <p className="text-slate-500">কোনো নতুন অ্যাপ্লিকেশন নেই।</p>
             </div>
           ) : (
             <div className="divide-y divide-gray-100 dark:divide-gray-700">
               {providers.map(p => (
-                <div key={p.id} className="p-6 flex flex-col md:flex-row justify-between items-start md:items-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <div key={p.id} className="p-6 flex flex-col md:flex-row justify-between items-start md:items-center hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
                   <div className="space-y-1 mb-4 md:mb-0">
                     <div className="flex items-center gap-2">
                       <p className="font-bold text-lg dark:text-white">{p.nid_number}</p>
                       <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs font-bold rounded">New</span>
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">📍 বর্তমান ঠিকানা: {p.present_address}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">📞 জরুরি যোগাযোগ: {p.emergency_contact_name} ({p.emergency_contact_phone})</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-300">📍 বর্তমান ঠিকানা: {p.present_address}</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-300">📞 জরুরি যোগাযোগ: {p.emergency_contact_name} ({p.emergency_contact_phone})</p>
                   </div>
                   <div className="space-x-3">
                     <Button onClick={() => handleApprove(p.id)} className="bg-green-600 hover:bg-green-700 text-white shadow-sm px-6">অ্যাপ্রুভ</Button>
@@ -204,26 +205,26 @@ export default function AdminDashboard() {
       </Card>
 
       {/* Services CMS Manager */}
-      <Card className="border-0 shadow-lg dark:bg-gray-800">
-        <CardHeader className="bg-gray-50 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700 pb-4">
+      <Card className="border-0 shadow-lg dark:bg-slate-800">
+        <CardHeader className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 pb-4">
           <CardTitle className="text-xl dark:text-white">সার্ভিস ম্যানেজমেন্ট (CMS)</CardTitle>
         </CardHeader>
         <CardContent className="p-6 space-y-8">
           
-          <form onSubmit={handleAddService} className="space-y-4 bg-indigo-50/50 dark:bg-indigo-900/10 p-6 rounded-xl border border-indigo-100 dark:border-indigo-800">
+          <form onSubmit={handleAddService} className="space-y-4 bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700">
             <h3 className="font-bold text-lg flex items-center gap-2 dark:text-white">
-              <Plus className="w-5 h-5 text-indigo-600" /> নতুন সার্ভিস যোগ করুন
+              <Plus className="w-5 h-5 text-blue-600" /> নতুন সার্ভিস যোগ করুন
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="dark:text-gray-300">সার্ভিসের নাম</Label>
-                <Input required placeholder="যেমন: Mistry (মিস্ত্রি)" className="dark:bg-gray-900 dark:border-gray-700" value={newService.name} onChange={e => setNewService({...newService, name: e.target.value})} />
+                <Label className="dark:text-slate-300">সার্ভিসের নাম</Label>
+                <Input required placeholder="যেমন: Mistry (মিস্ত্রি)" className="dark:bg-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-50" value={newService.name} onChange={e => setNewService({...newService, name: e.target.value})} />
               </div>
               <div className="space-y-2">
-                <Label className="dark:text-gray-300">ক্যাটাগরি</Label>
+                <Label className="dark:text-slate-300">ক্যাটাগরি</Label>
                 <select 
                   required 
-                  className="flex h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-800 dark:bg-gray-950 dark:ring-offset-gray-950 dark:placeholder:text-gray-400 dark:focus-visible:ring-gray-300"
+                  className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:bg-slate-900 dark:ring-offset-gray-950 dark:placeholder:text-slate-400 dark:focus-visible:ring-slate-300"
                   value={newService.category_id} 
                   onChange={e => setNewService({...newService, category_id: e.target.value})}
                 >
@@ -232,25 +233,25 @@ export default function AdminDashboard() {
                 </select>
               </div>
               <div className="space-y-2 md:col-span-2">
-                <Label className="dark:text-gray-300">বিবরণ</Label>
-                <Input required placeholder="সার্ভিসের বিবরণ..." className="dark:bg-gray-900 dark:border-gray-700" value={newService.description} onChange={e => setNewService({...newService, description: e.target.value})} />
+                <Label className="dark:text-slate-300">বিবরণ</Label>
+                <Input required placeholder="সার্ভিসের বিবরণ..." className="dark:bg-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-50" value={newService.description} onChange={e => setNewService({...newService, description: e.target.value})} />
               </div>
               <div className="space-y-2">
-                <Label className="dark:text-gray-300">প্রাথমিক মূল্য (৳)</Label>
-                <Input required type="number" placeholder="যেমন: 500" className="dark:bg-gray-900 dark:border-gray-700" value={newService.base_price} onChange={e => setNewService({...newService, base_price: e.target.value})} />
+                <Label className="dark:text-slate-300">প্রাথমিক মূল্য (৳)</Label>
+                <Input required type="number" placeholder="যেমন: 500" className="dark:bg-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-50" value={newService.base_price} onChange={e => setNewService({...newService, base_price: e.target.value})} />
               </div>
             </div>
-            <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700 shadow-sm mt-4">সার্ভিসটি সেভ করুন</Button>
+            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 shadow-sm mt-4">সার্ভিসটি সেভ করুন</Button>
           </form>
 
           <div>
             <h3 className="font-bold text-lg mb-4 dark:text-white">বর্তমান সার্ভিস সমূহ ({services.length})</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {services.map(s => (
-                <div key={s.id} className="p-4 border rounded-lg bg-white dark:bg-gray-900 dark:border-gray-700">
+                <div key={s.id} className="p-4 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700">
                   <h4 className="font-bold dark:text-white">{s.name}</h4>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{s.description}</p>
-                  <p className="font-bold text-indigo-600 dark:text-indigo-400 mt-2">৳ {(s.base_price / 100).toFixed(0)}</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">{s.description}</p>
+                  <p className="font-bold text-blue-600 dark:text-blue-400 mt-2">{formatBDT(s.base_price)}</p>
                 </div>
               ))}
             </div>

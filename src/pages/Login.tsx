@@ -29,7 +29,7 @@ export default function Login() {
 
   return (
     <div className="flex items-center justify-center min-h-[80vh] p-4">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md dark:bg-slate-800 dark:border-slate-700">
         <CardHeader className="space-y-1 text-center">
           <CardTitle className="text-2xl font-bold">লগইন করুন</CardTitle>
           <CardDescription>
@@ -40,8 +40,7 @@ export default function Login() {
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">ইমেইল</Label>
-              <Input 
-                id="email" 
+              <Input className="dark:bg-slate-900 dark:border-slate-700 dark:text-slate-50" id="email" 
                 type="email" 
                 placeholder="আপনার ইমেইল" 
                 value={email}
@@ -51,8 +50,7 @@ export default function Login() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">পাসওয়ার্ড</Label>
-              <Input 
-                id="password" 
+              <Input className="dark:bg-slate-900 dark:border-slate-700 dark:text-slate-50" id="password" 
                 type="password" 
                 value={password}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
@@ -66,7 +64,7 @@ export default function Login() {
           </form>
         </CardContent>
         <CardFooter className="flex justify-center">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-slate-600">
             একাউন্ট নেই? <Link to="/signup" className="text-blue-600 hover:underline">নতুন একাউন্ট খুলুন</Link>
           </p>
         </CardFooter>

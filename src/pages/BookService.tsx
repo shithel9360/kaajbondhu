@@ -1,48 +1,36 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Calendar, Clock, CheckCircle2, MapPin } from 'lucide-react';
 
-// Leaflet Map Imports
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import { PriceDisplay, formatBDT } from '@/components/ui/PriceDisplay';
 
-// Fix leaflet default icon issue in Vite
-import icon from 'leaflet/dist/images/marker-icon.png';
-import iconShadow from 'leaflet/dist/images/marker-shadow.png';
-
-let DefaultIcon = L.icon({
-    iconUrl: icon,
-    shadowUrl: iconShadow,
-    iconAnchor: [12, 41]
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconUrl: markerIcon,
+  iconRetinaUrl: markerIcon2x,
+  shadowUrl: markerShadow,
 });
-L.Marker.prototype.options.icon = DefaultIcon;
 
-// Component to handle map clicks
 function LocationPicker({ position, setPosition, setAddress }: any) {
   useMapEvents({
     click(e) {
       setPosition(e.latlng);
-      // Optional: Reverse geocode here to auto-fill address
       fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${e.latlng.lat}&lon=${e.latlng.lng}`)
         .then(res => res.json())
         .then(data => {
-          if (data && data.display_name) {
-            setAddress(data.display_name);
-          }
-        })
-        .catch(() => {});
+          if (data.display_name) setAddress(data.display_name);
+        });
     },
   });
-
-  return position === null ? null : (
-    <Marker position={position}></Marker>
-  );
+  return position ? <Marker position={position} /> : null;
 }
 
 export default function BookService() {
@@ -50,12 +38,9 @@ export default function BookService() {
   const navigate = useNavigate();
   const [service, setService] = useState<any>(null);
   const [address, setAddress] = useState('');
-  const [scheduledAt, setScheduledAt] = useState('');
+  const [date, setDate] = useState('');
+  const [position, setPosition] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  
-  // Default to Dhaka center
-  const [position, setPosition] = useState<any>({ lat: 23.8103, lng: 90.4125 });
 
   useEffect(() => {
     async function fetchService() {
@@ -63,168 +48,162 @@ export default function BookService() {
       if (data) setService(data);
     }
     fetchService();
+    
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => setPosition({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        () => setPosition({ lat: 23.8103, lng: 90.4125 })
+      );
+    }
   }, [id]);
 
-  const handleBooking = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const handleBooking = async () => {
+    if (!address || !date || !position) {
+      alert('অনুগ্রহ করে তারিখ এবং ম্যাপ থেকে ঠিকানা নির্বাচন করুন।');
+      return;
+    }
 
+    setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
-      alert('বুকিং করতে লগইন করা প্রয়োজন!');
+      alert('বুকিং করতে লগইন করুন');
       navigate('/login');
       return;
     }
 
-    const isoDate = new Date(scheduledAt).toISOString();
-    
+    const { data: roleData } = await supabase.from('user_roles').select('role').eq('user_id', user.id).single();
+    if (roleData?.role !== 'customer') {
+      alert('শুধুমাত্র গ্রাহকরা বুকিং করতে পারবেন।');
+      setLoading(false);
+      return;
+    }
+
+    const currentPrice = service.discount_percentage > 0 
+      ? service.base_price - (service.base_price * (service.discount_percentage / 100)) 
+      : service.base_price;
+
     const { error } = await supabase.from('bookings').insert({
       customer_id: user.id,
-      service_id: id,
+      service_id: service.id,
       address,
       lat: position.lat,
       lng: position.lng,
-      scheduled_at: isoDate,
-      total_price: service.base_price, // Stores the discounted price
+      scheduled_at: new Date(date).toISOString(),
+      total_price: currentPrice,
       status: 'pending'
     });
+
+    setLoading(false);
 
     if (error) {
       alert('বুকিং ব্যর্থ হয়েছে: ' + error.message);
     } else {
-      setSuccess(true);
-      setTimeout(() => navigate('/dashboard'), 2000);
+      alert('আপনার বুকিং সফলভাবে গ্রহণ করা হয়েছে!');
+      navigate('/dashboard');
     }
-    setLoading(false);
   };
 
-  if (!service) return <div className="p-12 text-center text-gray-500">লোড হচ্ছে...</div>;
+  if (!service) return <div className="p-8 text-center dark:text-slate-400">লোড হচ্ছে...</div>;
 
-  if (success) {
-    return (
-      <div className="container mx-auto p-4 max-w-lg mt-12">
-        <Card className="text-center py-12 shadow-lg border-0 bg-gradient-to-b from-green-50 to-white">
-          <CheckCircle2 className="w-20 h-20 text-green-500 mx-auto mb-6" />
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">বুকিং সফল হয়েছে!</h2>
-          <p className="text-gray-600 mb-6">আপনার রিকোয়েস্টটি একজন প্রোভাইডারের কাছে পাঠানো হয়েছে।</p>
-          <p className="text-sm text-gray-400">ড্যাশবোর্ডে রিডাইরেক্ট করা হচ্ছে...</p>
-        </Card>
-      </div>
-    );
-  }
-
-  const originalPrice = service.base_price / (1 - (service.discount_percentage || 0) / 100);
+  const originalPrice = service.base_price;
+  const currentPrice = service.discount_percentage > 0 
+    ? originalPrice - (originalPrice * (service.discount_percentage / 100)) 
+    : originalPrice;
 
   return (
-    <div className="container mx-auto p-4 max-w-4xl mt-12 mb-20">
-      <div className="mb-8 text-center">
-        <h1 className="text-3xl font-extrabold text-gray-900 mb-2">সার্ভিস বুকিং</h1>
-        <p className="text-gray-500">ম্যাপে আপনার লোকেশন দিন এবং ফর্মটি পূরণ করুন</p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Service Details & Map */}
-        <div className="space-y-6">
-          <Card className="border-0 shadow-md bg-indigo-50">
-            <CardHeader>
-              <CardTitle className="text-xl text-indigo-900">{service.name}</CardTitle>
-              <CardDescription className="text-indigo-700/80 mt-2 line-clamp-3">
-                {service.description}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-white p-4 rounded-xl shadow-sm border border-indigo-100">
-                <p className="text-sm text-gray-500 mb-1">মোট বিল</p>
-                <div className="flex items-end gap-2">
-                  <span className="text-3xl font-extrabold text-gray-900">
-                    ৳ {(service.base_price / 100).toFixed(0)}
-                  </span>
-                  {service.pricing_model === 'starting_at' && <span className="text-gray-500 pb-1">থেকে শুরু</span>}
-                  
-                  {service.discount_percentage > 0 && (
-                    <span className="text-sm text-gray-400 line-through pb-1 ml-2">
-                      ৳ {(originalPrice / 100).toFixed(0)}
-                    </span>
-                  )}
-                </div>
-                
-                {service.discount_percentage > 0 && (
-                  <div className="mt-2 inline-block px-2 py-1 bg-red-100 text-red-600 text-xs font-bold rounded">
-                    {service.discount_percentage}% স্পেশাল ডিসকাউন্ট!
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Interactive Map */}
-          <Card className="border-0 shadow-md overflow-hidden">
-            <CardHeader className="bg-white pb-2">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-indigo-500" />
-                ম্যাপে আপনার অবস্থান নির্বাচন করুন
-              </CardTitle>
-              <CardDescription>ম্যাপের উপর ক্লিক করে আপনার সঠিক লোকেশন সেট করুন</CardDescription>
-            </CardHeader>
-            <div className="h-64 w-full z-0 relative">
-              <MapContainer center={[23.8103, 90.4125]} zoom={12} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
-                <TileLayer
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                <LocationPicker position={position} setPosition={setPosition} setAddress={setAddress} />
-              </MapContainer>
-            </div>
-          </Card>
+    <div className="container mx-auto p-4 max-w-4xl mt-8 mb-20">
+      <div className="bg-white dark:bg-slate-900 shadow-xl rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
+        
+        {/* Header section */}
+        <div className="bg-blue-600 dark:bg-blue-600 p-8 text-white">
+          <h1 className="text-3xl font-bold mb-2">{service.name}</h1>
+          <p className="text-blue-50 mb-6 max-w-2xl">{service.description}</p>
+          <div className="bg-white/10 rounded-xl p-4 inline-block">
+            <PriceDisplay 
+              amountPoisha={service.base_price} 
+              pricingModel={service.pricing_model} 
+              discountPercentage={service.discount_percentage}
+              size="lg"
+              className="text-white"
+            />
+          </div>
         </div>
 
-        {/* Booking Form */}
-        <Card className="border-0 shadow-lg h-fit">
-          <CardContent className="p-6">
-            <form onSubmit={handleBooking} className="space-y-5">
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2 text-gray-700">
-                  <MapPin className="w-4 h-4 text-indigo-500" />
-                  সম্পূর্ণ ঠিকানা (ম্যাপ থেকে স্বয়ংক্রিয়ভাবে আসবে)
-                </Label>
-                <Input 
-                  required 
-                  placeholder="বাসা নং, রোড নং, এলাকা..." 
-                  className="bg-gray-50 border-gray-200 focus-visible:ring-indigo-500 rounded-lg py-6"
-                  value={address} 
-                  onChange={e => setAddress(e.target.value)} 
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2 text-gray-700">
-                  <Calendar className="w-4 h-4 text-indigo-500" />
-                  কখন সার্ভিসটি প্রয়োজন?
-                </Label>
-                <Input 
-                  type="datetime-local" 
-                  required 
-                  className="bg-gray-50 border-gray-200 focus-visible:ring-indigo-500 rounded-lg py-6"
-                  value={scheduledAt} 
-                  onChange={e => setScheduledAt(e.target.value)} 
-                />
-              </div>
+        <div className="p-8">
+          <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6">আপনার বুকিং বিস্তারিত</h3>
+          
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">কবে এবং কখন সার্ভিসটি চাচ্ছেন?</label>
+              <Input className="dark:bg-slate-900 dark:border-slate-700 dark:text-slate-50" type="datetime-local" 
+                value={date} 
+                onChange={e => setDate(e.target.value)} 
+                
+              />
+            </div>
 
-              <div className="pt-4">
-                <Button 
-                  type="submit" 
-                  className="w-full py-6 text-lg rounded-xl shadow-md bg-indigo-600 hover:bg-indigo-700"
-                  disabled={loading}
-                >
-                  {loading ? 'বুকিং হচ্ছে...' : 'বুকিং কনফার্ম করুন'}
-                </Button>
-                <p className="text-xs text-center text-gray-400 mt-4 flex items-center justify-center gap-1">
-                  <Clock className="w-3 h-3" /> কোনো হিডেন চার্জ নেই
-                </p>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">ম্যাপে আপনার সঠিক লোকেশন পিন করুন</label>
+              <div className="h-64 rounded-xl overflow-hidden border-2 border-blue-100 dark:border-slate-700 z-10 relative">
+                {position && (
+                  <MapContainer center={position} zoom={13} style={{ height: '100%', width: '100%' }}>
+                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                    <LocationPicker position={position} setPosition={setPosition} setAddress={setAddress} />
+                  </MapContainer>
+                )}
               </div>
-            </form>
-          </CardContent>
-        </Card>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">আপনার সম্পূর্ণ ঠিকানা (ম্যাপ থেকে স্বয়ংক্রিয়ভাবে আসতে পারে)</label>
+              <Input className="dark:bg-slate-900 dark:border-slate-700 dark:text-slate-50" type="text" 
+                placeholder="যেমন: বাসা-১০, রোড-২, মিরপুর, ঢাকা" 
+                value={address} 
+                onChange={e => setAddress(e.target.value)} 
+                
+              />
+            </div>
+          </div>
+        </div>
+        
+        {/* Checkout Summary */}
+        <div className="bg-slate-50 dark:bg-slate-800 p-8 border-t border-slate-200 dark:border-slate-700">
+          <h4 className="font-bold text-lg mb-4 text-slate-900 dark:text-white">পেমেন্ট সামারি</h4>
+          <div className="space-y-3 mb-6">
+            <div className="flex justify-between text-slate-600 dark:text-slate-400">
+              <span>{service.pricing_model === 'starting_at' ? 'বেস সার্ভিস ফি' : 'সার্ভিস ফি'}</span>
+              <span>{formatBDT(originalPrice)}</span>
+            </div>
+            {service.discount_percentage > 0 && (
+              <div className="flex justify-between text-red-600 dark:text-red-400 font-medium">
+                <span>ডিসকাউন্ট ({service.discount_percentage}%)</span>
+                <span>- {formatBDT(originalPrice - currentPrice)}</span>
+              </div>
+            )}
+            <div className="flex justify-between text-slate-500 text-sm italic">
+              <span>প্ল্যাটফর্ম ফি (সার্ভিস ফি এর অন্তর্ভুক্ত)</span>
+              <span>প্রযোজ্য</span>
+            </div>
+            <div className="flex justify-between font-bold text-xl pt-4 border-t border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white">
+              <span>সর্বমোট {service.pricing_model === 'starting_at' ? '(আনুমানিক)' : ''}</span>
+              <span>{formatBDT(currentPrice)}</span>
+            </div>
+            {service.pricing_model === 'starting_at' && (
+              <p className="text-xs text-slate-500 dark:text-slate-400 text-right mt-1">
+                * প্রয়োজনীয় মেটেরিয়াল এবং অতিরিক্ত কাজের উপর নির্ভর করে মূল ফি পরিবর্তন হতে পারে
+              </p>
+            )}
+          </div>
+          
+          <Button 
+            className="w-full h-14 text-lg rounded-xl shadow-lg bg-blue-600 hover:bg-blue-700 text-white transition-all" 
+            onClick={handleBooking}
+            disabled={loading}
+          >
+            {loading ? 'প্রসেসিং...' : 'বুকিং নিশ্চিত করুন'}
+          </Button>
+        </div>
       </div>
     </div>
   );

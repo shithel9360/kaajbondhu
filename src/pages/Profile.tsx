@@ -73,14 +73,14 @@ export default function Profile() {
   return (
     <div className="container mx-auto p-4 max-w-2xl mt-12 mb-20">
       <Card className="border-0 shadow-lg bg-white">
-        <CardHeader className="bg-indigo-50 border-b border-indigo-100 pb-6">
+        <CardHeader className="bg-blue-50 border-b border-blue-100 pb-6">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-md">
+            <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-md">
               {formData.full_name ? formData.full_name.charAt(0).toUpperCase() : <User />}
             </div>
             <div>
-              <CardTitle className="text-2xl text-indigo-900">আমার প্রোফাইল</CardTitle>
-              <CardDescription className="text-indigo-700">
+              <CardTitle className="text-2xl text-blue-900">আমার প্রোফাইল</CardTitle>
+              <CardDescription className="text-blue-700">
                 আপনার ব্যক্তিগত তথ্য আপডেট করুন
               </CardDescription>
             </div>
@@ -89,41 +89,38 @@ export default function Profile() {
         <CardContent className="p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label className="text-gray-700">ইমেইল (পরিবর্তনযোগ্য নয়)</Label>
-              <Input 
-                value={email}
+              <Label className="text-slate-700">ইমেইল (পরিবর্তনযোগ্য নয়)</Label>
+              <Input value={email}
                 disabled
-                className="bg-gray-100 border-gray-200 text-gray-500"
+                className="bg-slate-100 border-slate-200 text-slate-500 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-50"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="full_name" className="flex items-center gap-2 text-gray-700">
-                <User className="w-4 h-4 text-indigo-500" />
+              <Label htmlFor="full_name" className="flex items-center gap-2 text-slate-700">
+                <User className="w-4 h-4 text-blue-500" />
                 আপনার পুরো নাম
               </Label>
-              <Input 
-                id="full_name"
+              <Input id="full_name"
                 required
                 value={formData.full_name}
                 onChange={handleChange}
-                className="border-gray-300 focus-visible:ring-indigo-500"
+                className="border-slate-300 focus-visible:ring-blue-500 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-50"
                 placeholder="যেমন: রহিম মিয়া"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone_number" className="flex items-center gap-2 text-gray-700">
-                <Phone className="w-4 h-4 text-indigo-500" />
+              <Label htmlFor="phone_number" className="flex items-center gap-2 text-slate-700">
+                <Phone className="w-4 h-4 text-blue-500" />
                 মোবাইল নম্বর
               </Label>
-              <Input 
-                id="phone_number"
+              <Input id="phone_number"
                 type="tel"
                 required
                 value={formData.phone_number}
                 onChange={handleChange}
-                className="border-gray-300 focus-visible:ring-indigo-500"
+                className="border-slate-300 focus-visible:ring-blue-500 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-50"
                 placeholder="01XXXXXXXXX"
               />
             </div>
@@ -137,7 +134,7 @@ export default function Profile() {
 
             <Button 
               type="submit" 
-              className="w-full py-6 text-lg rounded-xl shadow-md bg-indigo-600 hover:bg-indigo-700 transition-all"
+              className="w-full py-6 text-lg rounded-xl shadow-md bg-blue-600 hover:bg-blue-700 transition-all"
               disabled={loading}
             >
               {loading ? 'আপডেট হচ্ছে...' : 'সেভ করুন'}

@@ -41,7 +41,7 @@ export default function Signup() {
 
   return (
     <div className="flex items-center justify-center min-h-[80vh] p-4">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md dark:bg-slate-800 dark:border-slate-700">
         <CardHeader className="space-y-1 text-center">
           <CardTitle className="text-2xl font-bold">একাউন্ট তৈরি করুন</CardTitle>
           <CardDescription>
@@ -52,8 +52,7 @@ export default function Signup() {
           <form onSubmit={handleSignup} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="fullName">পুরো নাম</Label>
-              <Input 
-                id="fullName" 
+              <Input className="dark:bg-slate-900 dark:border-slate-700 dark:text-slate-50" id="fullName" 
                 placeholder="যেমন: রহিম মিয়া" 
                 value={fullName}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFullName(e.target.value)}
@@ -62,8 +61,7 @@ export default function Signup() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone">মোবাইল নাম্বার</Label>
-              <Input 
-                id="phone" 
+              <Input className="dark:bg-slate-900 dark:border-slate-700 dark:text-slate-50" id="phone" 
                 type="tel"
                 placeholder="01XXXXXXXXX" 
                 value={phone}
@@ -73,8 +71,7 @@ export default function Signup() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">ইমেইল</Label>
-              <Input 
-                id="email" 
+              <Input className="dark:bg-slate-900 dark:border-slate-700 dark:text-slate-50" id="email" 
                 type="email" 
                 placeholder="আপনার ইমেইল" 
                 value={email}
@@ -84,8 +81,7 @@ export default function Signup() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">পাসওয়ার্ড</Label>
-              <Input 
-                id="password" 
+              <Input className="dark:bg-slate-900 dark:border-slate-700 dark:text-slate-50" id="password" 
                 type="password" 
                 value={password}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
@@ -100,7 +96,7 @@ export default function Signup() {
           </form>
         </CardContent>
         <CardFooter className="flex justify-center">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-slate-600">
             আগে থেকেই একাউন্ট আছে? <Link to="/login" className="text-blue-600 hover:underline">লগইন করুন</Link>
           </p>
         </CardFooter>
