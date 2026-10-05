@@ -28,7 +28,7 @@ function App() {
               <div className="flex items-center space-x-3">
                 <ModeToggle />
                 <Link to="/dashboard" className="focus:outline-none">
-                  <Button variant="outline" className="rounded-full px-6 font-semibold border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-blue-600 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-blue-400 bg-transparent">
+                  <Button variant="outline" className=" px-6 font-semibold border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-blue-600 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-blue-400 bg-transparent">
                     ড্যাশবোর্ড
                   </Button>
                 </Link>

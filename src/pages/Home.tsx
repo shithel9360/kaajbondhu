@@ -43,11 +43,11 @@ export default function Home() {
         <div className="absolute inset-0 bg-grid-slate-100/[0.04] bg-[bottom_1px_center] dark:bg-grid-slate-900/[0.04] dark:bg-[bottom_1px_center]" style={{ maskImage: 'linear-gradient(to bottom, transparent, black)' }}></div>
         
         {/* Decorative blobs */}
-        <div className="absolute top-0 left-0 w-72 h-72 bg-purple-300 dark:bg-purple-900 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
-        <div className="absolute top-0 right-0 w-72 h-72 bg-blue-300 dark:bg-blue-900 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-0 left-0 w-72 h-72 bg-purple-300 dark:bg-purple-900  mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+        <div className="absolute top-0 right-0 w-72 h-72 bg-blue-300 dark:bg-blue-900  mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
         
         <div className="container mx-auto px-4 relative z-10 text-center max-w-4xl space-y-8">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 text-blue-700 dark:text-blue-400 text-sm font-semibold mb-4 animate-fade-in">
+          <div className="inline-flex items-center gap-2 px-4 py-2  bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 text-blue-700 dark:text-blue-400 text-sm font-semibold mb-4 animate-fade-in">
             <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" /> 
             বাংলাদেশের সেরা সার্ভিস প্রোভাইডার
           </div>
@@ -105,7 +105,7 @@ export default function Home() {
                         size="lg"
                       />
                       <Link to={`/book/${service.id}`}>
-                        <Button className="rounded-full bg-amber-500 hover:bg-amber-600 text-white shadow-md">
+                        <Button className=" bg-amber-500 hover:bg-amber-600 text-white shadow-md">
                           বুক করুন
                         </Button>
                       </Link>
@@ -160,7 +160,7 @@ export default function Home() {
                             size="md"
                           />
                           <Link to={`/book/${service.id}`}>
-                            <Button className="rounded-full px-6 shadow-sm hover:shadow-md group-hover:bg-blue-600 group-hover:text-white transition-all">
+                            <Button className=" px-6 shadow-sm hover:shadow-md group-hover:bg-blue-600 group-hover:text-white transition-all">
                               বিস্তারিত <ChevronRight className="w-4 h-4 ml-1" />
                             </Button>
                           </Link>
@@ -187,21 +187,21 @@ export default function Home() {
         <div className="container mx-auto px-4 max-w-5xl">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="flex flex-col items-center text-center p-6 space-y-4">
-              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-full text-blue-600 dark:text-blue-400">
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20  text-blue-600 dark:text-blue-400">
                 <ShieldCheck className="w-10 h-10" />
               </div>
               <h3 className="text-xl font-bold text-slate-900 dark:text-white">ভেরিফাইড প্রোভাইডার</h3>
               <p className="text-slate-500 dark:text-slate-400">আমাদের সকল প্রোভাইডারদের ব্যাকগ্রাউন্ড এবং NID ভেরিফাই করা হয়।</p>
             </div>
             <div className="flex flex-col items-center text-center p-6 space-y-4">
-              <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-full text-orange-600 dark:text-orange-400">
+              <div className="p-4 bg-orange-50 dark:bg-orange-900/20  text-orange-600 dark:text-orange-400">
                 <Clock className="w-10 h-10" />
               </div>
               <h3 className="text-xl font-bold text-slate-900 dark:text-white">সময়মতো সার্ভিস</h3>
               <p className="text-slate-500 dark:text-slate-400">আপনার দেওয়া নির্ধারিত সময়ে প্রোভাইডার পৌঁছে যাবে আপনার দোরগোড়ায়।</p>
             </div>
             <div className="flex flex-col items-center text-center p-6 space-y-4">
-              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-full text-green-600 dark:text-green-400">
+              <div className="p-4 bg-green-50 dark:bg-green-900/20  text-green-600 dark:text-green-400">
                 <ThumbsUp className="w-10 h-10" />
               </div>
               <h3 className="text-xl font-bold text-slate-900 dark:text-white">১০০% সন্তুষ্টি গ্যারান্টি</h3>
