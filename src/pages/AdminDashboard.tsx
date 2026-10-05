@@ -85,9 +85,9 @@ export default function AdminDashboard() {
   if (loading) return <div className="p-8 text-center dark:text-slate-400">Loading Admin Secure Panel...</div>;
 
   return (
-    <div className="container mx-auto p-4 md:p-6 max-w-7xl mt-4 mb-20 space-y-8">
+    <div className=" animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out">
       <div>
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">অ্যাডমিন ড্যাশবোর্ড</h1>
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50 tracking-tight">অ্যাডমিন ড্যাশবোর্ড</h1>
         <p className="text-slate-500 dark:text-slate-400 mt-1">প্লাটফর্মের সার্বিক চিত্র এবং কন্ট্রোল প্যানেল</p>
       </div>
 
@@ -111,7 +111,7 @@ export default function AdminDashboard() {
             </div>
             <div>
               <p className="text-slate-500 dark:text-slate-400 font-medium">মোট বুকিং</p>
-              <h3 className="text-3xl font-bold text-slate-900 dark:text-white">{stats.bookings}</h3>
+              <h3 className="text-3xl font-bold text-slate-900 dark:text-slate-50">{stats.bookings}</h3>
             </div>
           </CardContent>
         </Card>
@@ -123,7 +123,7 @@ export default function AdminDashboard() {
             </div>
             <div>
               <p className="text-slate-500 dark:text-slate-400 font-medium">মোট ইউজার</p>
-              <h3 className="text-3xl font-bold text-slate-900 dark:text-white">{stats.users}</h3>
+              <h3 className="text-3xl font-bold text-slate-900 dark:text-slate-50">{stats.users}</h3>
             </div>
           </CardContent>
         </Card>

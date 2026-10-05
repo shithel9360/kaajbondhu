@@ -23,12 +23,12 @@ function App() {
                 <div className="w-8 h-8 rounded-lg bg-blue-600 dark:bg-blue-500 flex items-center justify-center text-white font-bold text-xl leading-none shadow-sm">
                   ক
                 </div>
-                <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">কাজ<span className="text-blue-600 dark:text-blue-400">বন্ধু</span></h1>
+                <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">কাজ<span className="text-blue-600 dark:text-blue-400">বন্ধু</span></h1>
               </Link>
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-1 sm:space-x-3">
                 <ModeToggle />
                 <Link to="/dashboard" className="focus:outline-none">
-                  <Button variant="outline" className=" px-6 font-semibold border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-blue-600 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-blue-400 bg-transparent">
+                  <Button variant="outline" className="px-3 sm:px-6 text-sm sm:text-base font-semibold border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-blue-600 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-blue-400 bg-transparent">
                     ড্যাশবোর্ড
                   </Button>
                 </Link>

@@ -104,21 +104,21 @@ export default function Dashboard() {
     } else alert('সমস্যা: ' + error.message);
   };
 
-    const handlePayment = async (id: string, amountPoisha: number) => {
+    const handlePayment = async (id: string, amountPoisha: number) => { console.log(id, amountPoisha);
     // SECURITY BARRIER: Real production implementation
     // Client MUST NOT update payment_status directly.
     // 1. Call secure backend Edge Function to initialize AamarPay session.
     // 2. Redirect to AamarPay URL returned by Edge Function.
     // 3. AamarPay calls Webhook Edge Function on success -> Webhook updates DB.
     
-    const confirmReal = window.confirm('AamarPay Payment Gateway integration is strictly BLOCKED pending Server Configuration.
+    const confirmReal = window.confirm(`AamarPay Payment Gateway integration is strictly BLOCKED pending Server Configuration.
 
-Would you like to process a Demo/Test Payment instead?');
+Would you like to process a Demo/Test Payment instead?`);
     
     if (confirmReal) {
-      alert('TEST/DEMO PAYMENT INITIATED.
+      alert(`TEST/DEMO PAYMENT INITIATED.
 
-Note: In a real environment, this connects to Supabase Edge Function 'payment-webhook'.');
+Note: In a real environment, this connects to Supabase Edge Function 'payment-webhook'.`);
       // Secure architecture placeholder - in demo we fake the webhook success via RPC or direct call just for testing the UI flow, 
       // but in real production, the webhook does this. We use a secure mock RPC if available, or just throw alert.
       alert('Mock Payment Successful (Client-Simulated).');
@@ -128,10 +128,10 @@ Note: In a real environment, this connects to Supabase Edge Function 'payment-we
   if (!user) return <div className="p-8 text-center text-slate-500">লোড হচ্ছে...</div>;
 
   return (
-    <div className="container mx-auto p-4 max-w-5xl mt-8 mb-20 space-y-8">
+    <div className=" animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white">ড্যাশবোর্ড</h1>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50">ড্যাশবোর্ড</h1>
           <p className="text-slate-500 dark:text-slate-400 mt-1">স্বাগতম, {user.email}</p>
         </div>
         <div className="flex items-center gap-2">
@@ -166,7 +166,7 @@ Note: In a real environment, this connects to Supabase Edge Function 'payment-we
               </div>
               <div>
                 <p className="text-slate-500 dark:text-slate-400 font-medium">সম্পন্ন করা কাজ</p>
-                <h3 className="text-4xl font-bold text-slate-900 dark:text-white">{stats.completed} টি</h3>
+                <h3 className="text-4xl font-bold text-slate-900 dark:text-slate-50">{stats.completed} টি</h3>
               </div>
             </CardContent>
           </Card>
@@ -199,7 +199,7 @@ Note: In a real environment, this connects to Supabase Edge Function 'payment-we
             <div className="pt-6 border-t border-slate-200 dark:border-slate-700">
               <div className="flex items-center gap-2 mb-6">
                 <CalendarCheck className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">নতুন কাজের সুযোগ</h3>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-slate-50">নতুন কাজের সুযোগ</h3>
               </div>
               {availableWork.length === 0 ? (
                 <div className="p-8 text-center bg-slate-50 dark:bg-slate-900 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
@@ -231,7 +231,7 @@ Note: In a real environment, this connects to Supabase Edge Function 'payment-we
           )}
 
           <div className="pt-6 border-t border-slate-200 dark:border-slate-700">
-            <h3 className="text-xl font-bold mb-6 text-slate-900 dark:text-white">{role === 'provider' ? 'আপনার চলমান কাজসমূহ' : 'আপনার বুকিং সমূহ'}</h3>
+            <h3 className="text-xl font-bold mb-6 text-slate-900 dark:text-slate-50">{role === 'provider' ? 'আপনার চলমান কাজসমূহ' : 'আপনার বুকিং সমূহ'}</h3>
             {bookings.length === 0 ? (
               <div className="text-center py-12 bg-slate-50 dark:bg-slate-900 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
                 <p className="text-slate-500 dark:text-slate-400 mb-4">আপনার কোনো {role === 'provider' ? 'কাজ' : 'বুকিং'} নেই।</p>
@@ -247,7 +247,7 @@ Note: In a real environment, this connects to Supabase Edge Function 'payment-we
                   <div key={b.id} className="border border-slate-200 dark:border-slate-700 p-6 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-slate-800 shadow-sm hover:shadow-md transition-shadow">
                     <div className="mb-4 md:mb-0 space-y-2">
                       <div className="flex items-center gap-3">
-                        <p className="font-bold text-xl text-slate-900 dark:text-white">{b.services?.name}</p>
+                        <p className="font-bold text-xl text-slate-900 dark:text-slate-50">{b.services?.name}</p>
                         <StatusBadge status={b.status} type="booking" />
                         <StatusBadge status={b.payment_status} type="payment" />
                       </div>
@@ -270,7 +270,7 @@ Note: In a real environment, this connects to Supabase Edge Function 'payment-we
                     <div className="text-left md:text-right flex flex-col items-start md:items-end gap-3 w-full md:w-auto">
                       <div className="text-left md:text-right">
                         <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-1">মোট বিল</p>
-                        <p className="font-extrabold text-2xl text-slate-900 dark:text-white">{formatBDT(b.total_price)}</p>
+                        <p className="font-extrabold text-2xl text-slate-900 dark:text-slate-50">{formatBDT(b.total_price)}</p>
                       </div>
                       
                       {/* Provider Actions */}

@@ -72,7 +72,7 @@ export default function ProviderApply() {
 
   if (profile && profile.status !== 'draft') {
     return (
-      <div className="container mx-auto p-8 text-center max-w-lg mt-8">
+      <div className=" animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out">
         <Card className="shadow-sm border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
           <CardHeader>
             <CardTitle>আবেদন স্ট্যাটাস</CardTitle>
@@ -89,7 +89,7 @@ export default function ProviderApply() {
   }
 
   return (
-    <div className="container mx-auto p-4 max-w-2xl mt-8">
+    <div className=" animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out">
       <Card className="shadow-sm border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
         <CardHeader>
           <CardTitle className="text-2xl">সার্ভিস প্রোভাইডার হিসেবে যোগ দিন</CardTitle>

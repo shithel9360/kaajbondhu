@@ -46,13 +46,13 @@ export default function Home() {
         <div className="absolute top-0 left-0 w-72 h-72 bg-purple-300 dark:bg-purple-900  mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
         <div className="absolute top-0 right-0 w-72 h-72 bg-blue-300 dark:bg-blue-900  mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
         
-        <div className="container mx-auto px-4 relative z-10 text-center max-w-4xl space-y-8">
+        <div className=" animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out">
           <div className="inline-flex items-center gap-2 px-4 py-2  bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 text-blue-700 dark:text-blue-400 text-sm font-semibold mb-4 animate-fade-in">
             <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" /> 
             বাংলাদেশের সেরা সার্ভিস প্রোভাইডার
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
+          <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight leading-tight">
             প্রয়োজনীয় সব সার্ভিস, <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400">
               এখন আপনার হাতের মুঠোয়
@@ -69,7 +69,7 @@ export default function Home() {
             </div>
             <Input type="text" 
               placeholder="আপনি কী সার্ভিস খুঁজছেন? (যেমন: এসি ক্লিনিং, প্লাম্বিং...)" 
-              className="h-16 pl-14 pr-4 w-full rounded-2xl text-lg shadow-xl border-0 ring-1 ring-blue-100 dark:ring-slate-700 dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 transition-all dark:bg-slate-900 dark:border-slate-700 dark:text-slate-50"
+              className="h-16 pl-14 pr-4 w-full rounded-2xl text-lg shadow-xl border-0 ring-1 ring-blue-100 dark:ring-slate-700 dark:bg-slate-800 dark:text-slate-50 focus:ring-2 focus:ring-blue-500 transition-all dark:bg-slate-900 dark:border-slate-700 dark:text-slate-50"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -80,12 +80,12 @@ export default function Home() {
       {/* Hot Offers */}
       {!search && offerServices.length > 0 && (
         <section className="py-12 bg-blue-50 dark:bg-slate-900">
-          <div className="container mx-auto px-4 max-w-6xl">
+          <div className=" animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out">
             <div className="flex items-center gap-3 mb-8">
               <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
                 <Zap className="w-6 h-6 text-red-600 dark:text-red-400" />
               </div>
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">হট অফার সমূহ</h2>
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-50">হট অফার সমূহ</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {offerServices.slice(0, 3).map(service => (
@@ -94,7 +94,7 @@ export default function Home() {
                     {service.discount_percentage}% ছাড়
                   </div>
                   <CardContent className="p-6">
-                    <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 pr-12">{service.name}</h3>
+                    <h3 className="text-xl font-bold text-slate-900 dark:text-slate-50 mb-2 pr-12">{service.name}</h3>
                     <p className="text-slate-500 dark:text-slate-400 text-sm mb-4 line-clamp-2">{service.description}</p>
                     
                     <div className="flex justify-between items-end mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
@@ -120,9 +120,9 @@ export default function Home() {
 
       {/* Services Catalog */}
       <section className="py-16 bg-slate-50 dark:bg-slate-900 flex-1">
-        <div className="container mx-auto px-4 max-w-6xl">
+        <div className=" animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">সকল সার্ভিস ক্যাটাগরি</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-slate-50 mb-4">সকল সার্ভিস ক্যাটাগরি</h2>
             <p className="text-slate-600 dark:text-slate-400 max-w-xl mx-auto">সঠিক মূল্যে সেরা সার্ভিসের নিশ্চয়তা</p>
           </div>
 
@@ -149,7 +149,7 @@ export default function Home() {
                             <Wrench className="w-6 h-6" />
                           </div>
                         </div>
-                        <h4 className="text-xl font-bold mb-2 text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{service.name}</h4>
+                        <h4 className="text-xl font-bold mb-2 text-slate-900 dark:text-slate-50 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{service.name}</h4>
                         <p className="text-slate-500 dark:text-slate-400 text-sm mb-6 line-clamp-2 h-10">{service.description}</p>
                         
                         <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-200 dark:border-slate-800">
@@ -184,27 +184,27 @@ export default function Home() {
 
       {/* Trust Badges */}
       <section className="py-16 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
-        <div className="container mx-auto px-4 max-w-5xl">
+        <div className=" animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="flex flex-col items-center text-center p-6 space-y-4">
               <div className="p-4 bg-blue-50 dark:bg-blue-900/20  text-blue-600 dark:text-blue-400">
                 <ShieldCheck className="w-10 h-10" />
               </div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white">ভেরিফাইড প্রোভাইডার</h3>
+              <h3 className="text-xl font-bold text-slate-900 dark:text-slate-50">ভেরিফাইড প্রোভাইডার</h3>
               <p className="text-slate-500 dark:text-slate-400">আমাদের সকল প্রোভাইডারদের ব্যাকগ্রাউন্ড এবং NID ভেরিফাই করা হয়।</p>
             </div>
             <div className="flex flex-col items-center text-center p-6 space-y-4">
               <div className="p-4 bg-orange-50 dark:bg-orange-900/20  text-orange-600 dark:text-orange-400">
                 <Clock className="w-10 h-10" />
               </div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white">সময়মতো সার্ভিস</h3>
+              <h3 className="text-xl font-bold text-slate-900 dark:text-slate-50">সময়মতো সার্ভিস</h3>
               <p className="text-slate-500 dark:text-slate-400">আপনার দেওয়া নির্ধারিত সময়ে প্রোভাইডার পৌঁছে যাবে আপনার দোরগোড়ায়।</p>
             </div>
             <div className="flex flex-col items-center text-center p-6 space-y-4">
               <div className="p-4 bg-green-50 dark:bg-green-900/20  text-green-600 dark:text-green-400">
                 <ThumbsUp className="w-10 h-10" />
               </div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white">১০০% সন্তুষ্টি গ্যারান্টি</h3>
+              <h3 className="text-xl font-bold text-slate-900 dark:text-slate-50">১০০% সন্তুষ্টি গ্যারান্টি</h3>
               <p className="text-slate-500 dark:text-slate-400">কাজের পর কোনো সমস্যা হলে আমরা বিনা খরচে সমাধান করে দেব।</p>
             </div>
           </div>

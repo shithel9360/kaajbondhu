@@ -131,7 +131,7 @@ export default function BookService() {
         </div>
 
         <div className="p-8">
-          <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6">আপনার বুকিং বিস্তারিত</h3>
+          <h3 className="text-xl font-bold text-slate-900 dark:text-slate-50 mb-6">আপনার বুকিং বিস্তারিত</h3>
           
           <div className="space-y-6">
             <div className="space-y-2">
@@ -169,7 +169,7 @@ export default function BookService() {
         
         {/* Checkout Summary */}
         <div className="bg-slate-50 dark:bg-slate-800 p-8 border-t border-slate-200 dark:border-slate-700">
-          <h4 className="font-bold text-lg mb-4 text-slate-900 dark:text-white">পেমেন্ট সামারি</h4>
+          <h4 className="font-bold text-lg mb-4 text-slate-900 dark:text-slate-50">পেমেন্ট সামারি</h4>
           <div className="space-y-3 mb-6">
             <div className="flex justify-between text-slate-600 dark:text-slate-400">
               <span>{service.pricing_model === 'starting_at' ? 'বেস সার্ভিস ফি' : 'সার্ভিস ফি'}</span>
@@ -185,7 +185,7 @@ export default function BookService() {
               <span>প্ল্যাটফর্ম ফি (সার্ভিস ফি এর অন্তর্ভুক্ত)</span>
               <span>প্রযোজ্য</span>
             </div>
-            <div className="flex justify-between font-bold text-xl pt-4 border-t border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white">
+            <div className="flex justify-between font-bold text-xl pt-4 border-t border-slate-200 dark:border-slate-600 text-slate-900 dark:text-slate-50">
               <span>সর্বমোট {service.pricing_model === 'starting_at' ? '(আনুমানিক)' : ''}</span>
               <span>{formatBDT(currentPrice)}</span>
             </div>

@@ -71,7 +71,7 @@ export default function Profile() {
   };
 
   return (
-    <div className="container mx-auto p-4 max-w-2xl mt-8 mb-20">
+    <div className=" animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out">
       <Card className="shadow-sm border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 overflow-hidden">
         <CardHeader className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-700 pb-6">
           <div className="flex items-center gap-4">
@@ -79,7 +79,7 @@ export default function Profile() {
               {formData.full_name ? formData.full_name.charAt(0).toUpperCase() : <User />}
             </div>
             <div>
-              <CardTitle className="text-2xl text-slate-900 dark:text-white">আমার প্রোফাইল</CardTitle>
+              <CardTitle className="text-2xl text-slate-900 dark:text-slate-50">আমার প্রোফাইল</CardTitle>
               <CardDescription className="text-slate-500 dark:text-slate-400">
                 আপনার ব্যক্তিগত তথ্য আপডেট করুন
               </CardDescription>
