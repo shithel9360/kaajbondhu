@@ -1,114 +1,85 @@
-# 🚀 কাজবন্ধু (KaajBondhu)
+# 🚀 কাজবন্ধু (KaajBondhu) - Final Production Architecture
 
-KaajBondhu is a premium, Bangladesh-first local service marketplace connecting customers with verified professionals (Providers/Mistry) for everyday tasks.
+KaajBondhu is a premium, Bangladesh-first local service marketplace connecting customers with verified professionals (Providers/Mistry).
 
-This repository contains the complete MVP Web Application.
+This repository contains the complete, production-hardened MVP Web Application.
 
 ---
 
 ## 🏗 Architecture & Tech Stack
 
 - **Frontend Hosting:** Vercel (SPA fallback configured via `vercel.json`).
-- **Frontend Framework:** React 18, Vite, TypeScript.
-- **Styling & UI:** Tailwind CSS v4, shadcn/ui, Lucide Icons.
-- **State Management:** React hooks + Supabase Realtime/Fetch.
-- **Map & Geolocation:** Leaflet + OpenStreetMap (100% Free, Zero Google Maps billing required).
+- **Frontend Framework:** React 18, Vite, TypeScript, Tailwind CSS v4.
 - **Backend & Database:** Supabase (PostgreSQL 15).
-- **Authentication:** Supabase Auth (Email/Password).
-- **Security Logic:** PostgreSQL Row Level Security (RLS) + Edge Functions / RPCs.
+- **Authentication:** Supabase Auth.
+- **Security Logic:** PostgreSQL Row Level Security (RLS) + `SECURITY DEFINER` RPCs.
 
 ---
 
-## 🔒 Security & Credential Rotation
+## 🔒 Security & Credential Management
 
-**⚠️ CRITICAL SECURITY WARNING:**
+**⚠️ CRITICAL CREDENTIAL WARNING:**
 A legacy database password was previously exposed in historical development logs.
-> **You MUST rotate your Supabase database password in the Supabase Cloud Console prior to public production launch.**
+> **USER ACTION REQUIRED:** You MUST manually rotate your Supabase database password in the Supabase Cloud Console prior to public production launch.
 
 ### Environment Variables
-**Never** put backend secrets in the browser bundle. Only the following safe, public-facing variables should be configured in your Vercel Production Environment (and `.env.local`):
+**Never** put backend secrets in the browser bundle. Only the following safe, public-facing variables should be configured in your Vercel Production Environment (and `.env.example`):
 ```env
 VITE_SUPABASE_URL=https://your-project-id.supabase.co
 VITE_SUPABASE_ANON_KEY=your-safe-anon-key
 ```
 
 ### Authorization & RLS
-- **Authentication:** Handled entirely by Supabase Auth.
-- **Role Model:** Defined securely in `public.user_roles` (`admin`, `customer`, `provider`). 
-- **Row Level Security (RLS):** All tables are protected.
-  - Customers can only read their own bookings.
-  - Providers can only see jobs they are assigned to, or public `pending` jobs.
-  - Profile visibility is restricted appropriately.
-- **RPCs:** Critical financial logic (e.g., `accept_booking`, `verify_booking_otp`, `complete_booking`) runs under `SECURITY DEFINER` with fixed `search_path = public` to ensure the client browser cannot manipulate financial outcomes or state transitions.
+- **Role Model:** Defined securely in `public.user_roles`.
+- **Negative Security Tested:** Cross-customer access, cross-provider access, and privilege escalation are completely blocked by RLS policies.
+- **RPCs:** Critical financial logic uses `SECURITY DEFINER` with fixed `SET search_path = public` to ensure the client browser cannot manipulate financial outcomes or state transitions.
 
-### Storage Security
-Provider KYC documents (NID) and portfolio images are uploaded to Supabase Storage.
-> **Action Required:** Ensure you manually set your Supabase Storage buckets to "Private" for KYC documents in the Supabase Dashboard, applying RLS so only Admins can read them.
+### Storage Security (Provider KYC)
+- **Bucket:** `provider_kyc`
+- **Privacy:** The bucket is marked `public = false`. Strict RLS policies guarantee:
+  - Providers can only upload and read their own KYC files based on `auth.uid()`.
+  - Authorized `admin` roles can read all KYC documents.
+  - Unauthenticated users and unauthorized customers are strictly DENIED access.
 
 ---
 
-## 💸 Booking Lifecycle & Matching
+## 💸 Booking & Payment Architecture
 
 The booking lifecycle strictly adheres to the PRD:
 `pending` → `matching` → `accepted` → `ongoing` → `completed`
 
-Payment state is entirely decoupled from the booking state:
+Payment state is decoupled from the booking state:
 `pending` → `authorized` → `paid` → `failed` → `refunded`
 
-### Provider Matching & Idempotency
-- **Atomic Acceptance:** Providers accept jobs via the `accept_booking` RPC. This uses PostgreSQL `FOR UPDATE` row-level locks. If two providers tap "Accept" on the exact same millisecond, exactly one will succeed.
-- **OTP Security:** When a provider accepts, the server securely generates a single-use, 15-minute expiring 4-digit OTP. The job cannot transition to `ongoing` unless the customer physically reads the OTP to the provider, preventing phantom starts.
+### Server-Side Commission & Financial Ledger
+- **No Hardcoded Commissions:** The legacy hardcoded 10% frontend/backend commission was completely removed.
+- **Dynamic Configuration:** Commission is now fetched securely on the server side from the `platform_settings` table (key: `commission_percentage`).
+- **Append-Only Ledger:** Upon job completion, the `complete_booking` RPC calculates the dynamic platform fee and provider payout securely, writing them as immutable records to `financial_ledger`. Client tampering of prices or fees is completely ignored by the backend.
 
-### Financial Ledger
-- **Append-Only:** Once a job is completed, the RPC dynamically calculates any platform commission and inserts immutable, append-only records into `financial_ledger`.
-- No client-side mathematics are trusted.
+### Real Payment Readiness & Edge Functions
+- **Payment Mocking:** The UI currently initiates a **Demo/Mock Payment**. Real BDT transactions are blocked until the Edge Function receives actual AamarPay merchant credentials.
+- **Webhook Idempotency:** The database contains a `payment_events` table designed for webhook idempotency, preventing duplicate transaction processing or replay attacks.
+- **Edge Function:** A secure Deno Edge Function (`supabase/functions/payment-webhook/index.ts`) is fully scaffolded and ready to handle AamarPay Server-to-Server callbacks. 
+> **CONFIGURATION REQUIRED:** To process real transactions, you must deploy this Edge Function and provide your `AAMARPAY_SIGNATURE_SECRET`.
 
 ---
 
-## 🎨 UI/UX & Theming
+## 🔐 OTP Security & Provider Matching
 
-The application features a strict, highly polished Design System:
-- **Pricing Uniformity:** A single `PriceDisplay` component renders all prices. All values are stored as integers (Poisha) in the database and formatted consistently.
-- **Dark/Light Mode:** Full WCAG 2.1 AA compliant Dark Mode using strict Tailwind `slate/blue/amber` mappings. Prevented hydration flash via a blocking script in `index.html`.
-- **Responsive:** Layout scales fluidly from 320px (Small Mobile) to 1920px (Desktop), converting tables to horizontal scroll-wrappers on mobile devices.
+- **Atomic Acceptance:** Handled via PostgreSQL `FOR UPDATE` lock. Multiple providers trying to accept the same job concurrently will result in exactly one successful assignment.
+- **OTP Gateway:** The job cannot transition to `ongoing` unless the provider verifies the 4-digit OTP provided by the customer. Validated server-side via RPC.
 
 ---
 
 ## 🛠 Admin CMS Management
 
-The Admin Dashboard provides a real-time CMS allowing administrators to dynamically manage operations without modifying frontend source code.
+Admins manage the platform dynamically without modifying source code.
 
 ### How to add a new "Mistry" service:
 1. Log in as an Admin.
-2. Navigate to the **Admin Dashboard** (`/admin`).
-3. Under the **Service Management (CMS)** section, click **"নতুন সার্ভিস যোগ করুন"** (Add New Service).
-4. Fill out the form:
-   - **Name:** "Mistry (মিস্ত্রি)"
-   - **Category:** Select the appropriate parent category.
-   - **Description:** Enter the service details.
-   - **Base Price:** Enter the base booking price.
-5. Click **Save**. 
-6. *Result:* The service instantly populates globally on the Landing Page, Search, and Booking flows using the centralized `PriceDisplay` logic.
+2. Navigate to `/admin`.
+3. Under the **Service Management (CMS)** section, click **"নতুন সার্ভিস যোগ করুন"**.
+4. Fill out the form (Name, Category, Base Price) and save.
+5. *Result:* The service instantly populates globally on the Landing Page and Booking flows.
 
-### Modifying Historical Prices
-If an Admin updates the base price of "AC Servicing" from ৳500 to ৳600, all *future* bookings will reflect ৳600. *Historical* bookings are safely preserved since the actual price was copied to `bookings.total_price` at the moment of checkout.
-
----
-
-## 💳 Payments (Demo Notice)
-
-Currently, the AamarPay checkout button is configured as a **DEMO/TEST ONLY** simulation. 
-Before processing real BDT transactions, you must replace the simulated `setTimeout` in `Dashboard.tsx` with a real AamarPay API initialization, and set up a Supabase Edge Function to securely handle the AamarPay Server-to-Server Webhook.
-
----
-
-## 📦 Deployment Instructions
-
-1. Push all code to your GitHub Repository.
-2. Connect the repository to **Vercel**.
-3. Select **Vite** as the framework.
-4. Add the Environment Variables:
-   - `VITE_SUPABASE_URL`
-   - `VITE_SUPABASE_ANON_KEY`
-5. Deploy.
-6. Verify your Vercel Domain is added to Supabase Auth -> URL Configuration -> Redirect URLs.
+Historical bookings are fully protected. Modifying a service price today will not alter the invoice of a booking completed yesterday.
