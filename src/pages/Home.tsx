@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ShieldCheck, Clock, Wrench, Search, Star, CheckCircle2, UserCheck, Shield } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { PriceDisplay } from '@/components/ui/PriceDisplay';
 
@@ -43,7 +44,7 @@ export default function Home() {
     <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
       
       {/* Premium Hero Section */}
-      <section className="relative bg-gradient-to-b from-[#F8FAFC] to-[#F1F5F9] dark:from-[#0F172A] dark:to-[#1E293B] pt-20 lg:pt-32 pb-24 lg:pb-32 overflow-hidden">
+      <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8 }} className="relative bg-gradient-to-b from-[#F8FAFC] to-[#F1F5F9] dark:from-[#0F172A] dark:to-[#1E293B] pt-20 lg:pt-32 pb-24 lg:pb-32 overflow-hidden">
         <div className="absolute inset-0 bg-grid-slate-100/[0.04] bg-[bottom_1px_center] dark:bg-grid-slate-900/[0.04] dark:bg-[bottom_1px_center]" style={{ maskImage: 'linear-gradient(to bottom, transparent, black)' }}></div>
         <div className="container mx-auto px-4 max-w-7xl animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out relative z-10">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
@@ -156,10 +157,10 @@ export default function Home() {
             
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Real Statistics / Trust Section */}
-      <section className="py-20 lg:py-32 bg-white dark:bg-slate-900">
+      <motion.section initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.7, ease: "easeOut" }} className="py-20 lg:py-32 bg-white dark:bg-slate-900">
         <div className="container mx-auto px-4 max-w-7xl animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
           <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
             <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-slate-50 max-w-2xl leading-tight">
@@ -196,10 +197,10 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Services Catalog - Modern Grid */}
-      <section id="services" className="py-24 lg:py-32 bg-slate-50 dark:bg-slate-900/50">
+      <motion.section initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.7, ease: "easeOut" }} id="services" className="py-24 lg:py-32 bg-slate-50 dark:bg-slate-900/50">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="text-center mb-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-slate-50 mb-6">জনপ্রিয় সার্ভিস সমূহ</h2>
@@ -261,10 +262,10 @@ export default function Home() {
             );
           })}
         </div>
-      </section>
+      </motion.section>
 
       {/* How it Works / Why Us Split Section */}
-      <section id="how-it-works" className="py-24 lg:py-32 bg-white dark:bg-slate-900">
+      <motion.section initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.7, ease: "easeOut" }} id="how-it-works" className="py-24 lg:py-32 bg-white dark:bg-slate-900">
         <div className="container mx-auto px-4 max-w-7xl animate-in fade-in slide-in-from-bottom-8 duration-700">
           <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
             
@@ -316,10 +317,10 @@ export default function Home() {
 
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Final CTA / Provider Section */}
-      <section className="py-24 lg:py-32 bg-slate-50 dark:bg-slate-900">
+      <motion.section initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.7, ease: "easeOut" }} className="py-24 lg:py-32 bg-slate-50 dark:bg-slate-900">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="bg-[#F8FAFC] dark:bg-slate-800 rounded-[3rem] p-12 md:p-24 text-center shadow-sm border border-slate-200 dark:border-slate-700 relative overflow-hidden">
              <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent dark:from-blue-900/10 opacity-50"></div>
@@ -343,7 +344,7 @@ export default function Home() {
              </div>
           </div>
         </div>
-      </section>
+      </motion.section>
     </div>
   );
 }
