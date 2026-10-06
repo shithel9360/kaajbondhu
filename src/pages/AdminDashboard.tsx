@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Users, Activity, Wallet, Plus, Server, UserCheck, CheckCircle2, XCircle } from 'lucide-react';
+import { Users, Activity, Wallet, Plus, Server, UserCheck, CheckCircle2, XCircle, Pencil, Trash } from 'lucide-react';
 import { formatBDT } from '@/components/ui/PriceDisplay';
 
 export default function AdminDashboard() {
@@ -18,8 +18,9 @@ export default function AdminDashboard() {
   const [categories, setCategories] = useState<any[]>([]);
   const [providers, setProviders] = useState<any[]>([]);
   
-  const [newService, setNewService] = useState({ name: '', description: '', base_price: '', category_id: '' });
+  const [newService, setNewService] = useState({ name: '', description: '', base_price: '', category_id: '', is_active: true });
   const [isAddingService, setIsAddingService] = useState(false);
+  const [editModeId, setEditModeId] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchAdminData() {
@@ -70,18 +71,61 @@ export default function AdminDashboard() {
     fetchAdminData();
   }, [navigate]);
 
-  const handleAddService = async (e: React.FormEvent) => {
+  const handleSaveService = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { error } = await supabase.from('services').insert({
-      name: newService.name,
-      description: newService.description,
-      base_price: parseInt(newService.base_price),
-      category_id: newService.category_id,
-      pricing_model: 'starting_at'
-    });
+    if (editModeId) {
+      const { error } = await supabase.from('services').update({
+        name: newService.name,
+        description: newService.description,
+        base_price: parseInt(newService.base_price),
+        category_id: newService.category_id,
+        is_active: newService.is_active,
+        is_active: newService.is_active,
+      }).eq('id', editModeId);
 
+      if (!error) {
+        alert('সার্ভিস সফলভাবে আপডেট করা হয়েছে!');
+        window.location.reload();
+      } else {
+        alert('সমস্যা হয়েছে: ' + error.message);
+      }
+    } else {
+      const { error } = await supabase.from('services').insert({
+        name: newService.name,
+        description: newService.description,
+        base_price: parseInt(newService.base_price),
+        category_id: newService.category_id,
+        pricing_model: 'starting_at'
+      });
+
+      if (!error) {
+        alert('সার্ভিস সফলভাবে যোগ করা হয়েছে!');
+        window.location.reload();
+      } else {
+        alert('সমস্যা হয়েছে: ' + error.message);
+      }
+    }
+  };
+
+  const handleEditClick = (service: any) => {
+    setNewService({
+      name: service.name,
+      description: service.description || '',
+      base_price: service.base_price.toString(),
+      category_id: service.category_id,
+      is_active: service.is_active
+    });
+    setEditModeId(service.id);
+    setIsAddingService(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDeleteService = async (serviceId: string) => {
+    if (!confirm('আপনি কি নিশ্চিত যে এই সার্ভিসটি মুছে ফেলতে চান?')) return;
+    
+    const { error } = await supabase.from('services').update({ archived_at: new Date().toISOString() }).eq('id', serviceId);
     if (!error) {
-      alert('সার্ভিস সফলভাবে যোগ করা হয়েছে!');
+      alert('সার্ভিস মুছে ফেলা হয়েছে।');
       window.location.reload();
     } else {
       alert('সমস্যা হয়েছে: ' + error.message);
@@ -204,7 +248,7 @@ export default function AdminDashboard() {
                 <Server className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 <CardTitle className="text-xl">সার্ভিস ম্যানেজমেন্ট (CMS)</CardTitle>
               </div>
-              <Button onClick={() => setIsAddingService(!isAddingService)} className="mt-4 sm:mt-0 shadow-sm bg-slate-900 hover:bg-slate-800 text-white dark:bg-blue-600 dark:hover:bg-blue-700">
+              <Button onClick={() => { setIsAddingService(!isAddingService); setEditModeId(null); setNewService({ name: '', description: '', base_price: '', category_id: '', is_active: true }); }} className="mt-4 sm:mt-0 shadow-sm bg-slate-900 hover:bg-slate-800 text-white dark:bg-blue-600 dark:hover:bg-blue-700">
                 <Plus className="w-4 h-4 mr-2" />
                 নতুন সার্ভিস যোগ করুন
               </Button>
@@ -213,7 +257,7 @@ export default function AdminDashboard() {
             <CardContent className="p-0">
               {isAddingService && (
                 <div className="p-6 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
-                  <form onSubmit={handleAddService} className="max-w-2xl space-y-4">
+                  <form onSubmit={handleSaveService} className="max-w-2xl space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label className="dark:text-slate-300">সার্ভিসের নাম</Label>
@@ -240,6 +284,10 @@ export default function AdminDashboard() {
                       <Label className="dark:text-slate-300">প্রাথমিক মূল্য (৳)</Label>
                       <Input required type="number" placeholder="যেমন: 500" value={newService.base_price} onChange={e => setNewService({...newService, base_price: e.target.value})} className="dark:bg-slate-800" />
                     </div>
+                    <div className="space-y-2 flex flex-row items-center gap-2">
+                      <input type="checkbox" id="is_active" checked={newService.is_active} onChange={e => setNewService({...newService, is_active: e.target.checked})} className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded dark:bg-gray-700 dark:border-gray-600" />
+                      <Label htmlFor="is_active" className="dark:text-slate-300 !mt-0">সার্ভিসটি কি বর্তমানে অ্যাকটিভ?</Label>
+                    </div>
                     <div className="pt-2 flex justify-end gap-2">
                       <Button type="button" variant="outline" onClick={() => setIsAddingService(false)} className="dark:text-slate-300">বাতিল</Button>
                       <Button type="submit">সেভ করুন</Button>
@@ -255,7 +303,8 @@ export default function AdminDashboard() {
                       <th className="p-4">সার্ভিসের নাম</th>
                       <th className="p-4">ক্যাটাগরি</th>
                       <th className="p-4">বেস প্রাইস</th>
-                      <th className="p-4 text-right">স্ট্যাটাস</th>
+                      <th className="p-4 text-center">স্ট্যাটাস</th>
+<th className="p-4 text-right">অ্যাকশন</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
