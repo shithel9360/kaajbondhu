@@ -238,9 +238,9 @@ export default function Home() {
           <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
             
             {/* Left: Graphic */}
-            <div className="relative h-[500px] lg:h-[650px] bg-slate-50 dark:bg-slate-800 rounded-[3rem] border border-slate-200 dark:border-slate-700 overflow-hidden group shadow-lg">
+            <div className="relative bg-slate-50 dark:bg-slate-800 rounded-[3rem] border border-slate-200 dark:border-slate-700 overflow-hidden group shadow-lg">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-100/50 to-transparent dark:from-blue-900/20"></div>
-              <div className="absolute inset-0 flex flex-col justify-center px-8 lg:px-16">
+              <div className="relative flex flex-col justify-center px-6 py-16 md:p-12 lg:p-16 h-full min-h-[500px] lg:min-h-[650px]">
                 <h3 className="text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-slate-50 mb-10 leading-tight">The Reasons People Count On Us</h3>
                 <div className="space-y-6">
                   {[
