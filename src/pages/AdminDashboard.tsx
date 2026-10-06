@@ -33,7 +33,7 @@ export default function AdminDashboard() {
         return;
       }
       
-      const { data: roleData } = await supabase.from('user_roles').select('role').eq('user_id', user.id).single();
+      const { data: roleData } = await supabase.from('user_roles').select('role').eq('user_id', user.id).maybeSingle();
       if (!roleData || roleData.role !== 'admin') {
         navigate('/dashboard');
         return;

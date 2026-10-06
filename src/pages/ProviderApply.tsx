@@ -36,7 +36,7 @@ export default function ProviderApply() {
         .from('provider_profiles')
         .select('*')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
         
       if (profileData) {
         setProfile(profileData);

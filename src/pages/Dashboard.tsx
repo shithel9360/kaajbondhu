@@ -37,7 +37,7 @@ export default function Dashboard() {
     }
     setUser(user);
 
-    const { data: roleData } = await supabase.from('user_roles').select('role').eq('user_id', user.id).single();
+    const { data: roleData } = await supabase.from('user_roles').select('role').eq('user_id', user.id).maybeSingle();
     const userRole = roleData ? roleData.role : 'customer';
     setRole(userRole);
 
@@ -49,7 +49,7 @@ export default function Dashboard() {
         .order('created_at', { ascending: false });
       if (bookingsData) setBookings(bookingsData);
 
-      const { data: profile } = await supabase.from('profiles').select('average_rating, total_reviews').eq('id', user.id).single();
+      const { data: profile } = await supabase.from('profiles').select('average_rating, total_reviews').eq('id', user.id).maybeSingle();
       if (profile) setCustomerStats(profile);
       
     } else if (userRole === 'provider') {
@@ -82,7 +82,7 @@ export default function Dashboard() {
       const totalIncome = incomeData ? incomeData.reduce((acc, curr) => acc + (curr.provider_amount || 0), 0) : 0;
       setStats({ income: totalIncome, completed: incomeData?.length || 0 });
 
-      const { data: provProfile } = await supabase.from('provider_profiles').select('is_online, average_rating, total_reviews').eq('id', user.id).single();
+      const { data: provProfile } = await supabase.from('provider_profiles').select('is_online, average_rating, total_reviews').eq('id', user.id).maybeSingle();
       if (provProfile) {
         setIsOnline(provProfile.is_online);
         setProviderStats(provProfile);

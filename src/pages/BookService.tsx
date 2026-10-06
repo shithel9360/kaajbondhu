@@ -45,7 +45,7 @@ export default function BookService() {
 
   useEffect(() => {
     async function fetchService() {
-      const { data } = await supabase.from('services').select('*').eq('id', id).single();
+      const { data } = await supabase.from('services').select('*').eq('id', id).maybeSingle();
       if (data) setService(data);
     }
     fetchService();
@@ -73,7 +73,7 @@ export default function BookService() {
       return;
     }
 
-    const { data: roleData } = await supabase.from('user_roles').select('role').eq('user_id', user.id).single();
+    const { data: roleData } = await supabase.from('user_roles').select('role').eq('user_id', user.id).maybeSingle();
     if (roleData?.role !== 'customer') {
       toast.info('শুধুমাত্র গ্রাহকরা বুকিং করতে পারবেন।');
       setLoading(false);

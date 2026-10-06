@@ -16,12 +16,12 @@ export function Navbar() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session?.user) {
-        supabase.from('profiles').select('full_name, avatar_url').eq('id', session.user.id).single().then(({data}) => {
+        supabase.from('profiles').select('full_name, avatar_url').eq('id', session.user.id).maybeSingle().then(({data}) => {
           if (data) setUserProfile(data);
         });
       }
       if (session?.user) {
-        supabase.from('profiles').select('full_name, avatar_url').eq('id', session.user.id).single().then(({data}) => {
+        supabase.from('profiles').select('full_name, avatar_url').eq('id', session.user.id).maybeSingle().then(({data}) => {
           if (data) setUserProfile(data);
         });
       }
