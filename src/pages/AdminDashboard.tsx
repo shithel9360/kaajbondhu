@@ -59,7 +59,8 @@ export default function AdminDashboard() {
       const { data: provData } = await supabase.from('provider_profiles').select('*').order('created_at', { ascending: false });
       
       // Load all bookings for CMS
-      const { data: bookingsList } = await supabase.from('bookings').select('*, services(name), customer:profiles(full_name, phone_number)').order('created_at', { ascending: false });
+      const { data: bookingsList, error } = await supabase.from('bookings').select('*, services(name), profiles(full_name, phone_number)').order('created_at', { ascending: false });
+      if (error) console.error('Admin Bookings Error:', error);
       if (bookingsList) setAllBookings(bookingsList);
       
       const { data: skillsData } = await supabase.from('provider_skills').select('provider_id, experience_years, categories(name)');
@@ -494,8 +495,8 @@ export default function AdminDashboard() {
                           <p className="text-xs text-slate-500 font-mono">ID: {b.id.substring(0,8)}...</p>
                         </td>
                         <td className="p-4">
-                          <p className="font-bold text-slate-700 dark:text-slate-300 text-sm">{b.customer?.full_name || 'অজানা'}</p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">{b.customer?.phone_number || b.address}</p>
+                          <p className="font-bold text-slate-700 dark:text-slate-300 text-sm">{b.profiles?.full_name || 'অজানা'}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">{b.profiles?.phone_number || b.address}</p>
                         </td>
                         <td className="p-4 text-slate-600 dark:text-slate-400 text-sm">
                           {new Date(b.scheduled_at).toLocaleString('bn-BD')}
