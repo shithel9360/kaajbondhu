@@ -72,8 +72,7 @@ export default function Profile() {
 
     const { error } = await supabase
       .from('profiles')
-      .update(updatePayload)
-      .eq('id', user.id);
+      .upsert({ id: user.id, ...updatePayload });
 
     if (error) {
       if (error.message.includes('bkash_number') || error.message.includes('bank_account')) {
