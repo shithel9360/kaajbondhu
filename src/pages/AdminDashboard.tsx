@@ -50,14 +50,17 @@ export default function AdminDashboard() {
       // Load provider applications (Manually matching profiles with provider_profiles)
       const { data: provData } = await supabase.from('provider_profiles').select('*').order('created_at', { ascending: false });
       
+      const { data: skillsData } = await supabase.from('provider_skills').select('provider_id, experience_years, categories(name)');
+      
       if (provData && provData.length > 0) {
          // Fetch corresponding profiles to get names
          const ids = provData.map(p => p.id);
          const { data: profData } = await supabase.from('profiles').select('id, full_name, phone_number').in('id', ids);
          
          const mergedProviders = provData.map(prov => {
+           const skill = skillsData?.find(s => s.provider_id === prov.id);
            const profile = profData?.find(p => p.id === prov.id);
-           return { ...prov, profile };
+           return { ...prov, profile, skill };
          });
          setProviders(mergedProviders);
       }
@@ -300,6 +303,7 @@ export default function AdminDashboard() {
                     <tr className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-600 dark:text-slate-400">
                       <th className="p-4">নাম ও ফোন</th>
                       <th className="p-4">NID নম্বর</th>
+<th className="p-4">কাজের ধরণ</th>
                       <th className="p-4">ঠিকানা</th>
                       <th className="p-4 text-center">স্ট্যাটাস</th>
                       <th className="p-4 text-right">অ্যাকশন</th>
@@ -314,6 +318,10 @@ export default function AdminDashboard() {
                         </td>
                         <td className="p-4 text-slate-600 dark:text-slate-400 font-mono text-sm">
                           {p.nid_number}
+                        </td>
+                        <td className="p-4">
+                          <p className="font-bold text-slate-700 dark:text-slate-300 text-sm">{p.skill?.categories?.name || 'অজানা'}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">{p.skill?.experience_years ? p.skill.experience_years + ' বছরের অভিজ্ঞতা' : 'নতুন'}</p>
                         </td>
                         <td className="p-4 text-slate-600 dark:text-slate-400 text-xs">
                           {p.present_address}
