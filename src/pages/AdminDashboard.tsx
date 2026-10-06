@@ -88,7 +88,7 @@ export default function AdminDashboard() {
       const { error } = await supabase.from('services').update({
         name: newService.name,
         description: newService.description,
-        base_price: parseInt(newService.base_price),
+        base_price: Math.round(parseFloat(newService.base_price) * 100),
         discount_percentage: parseInt(newService.discount_percentage.toString()) || 0,
         offer_text: newService.offer_text,
         category_id: newService.category_id,
@@ -107,7 +107,7 @@ export default function AdminDashboard() {
       const { error } = await supabase.from('services').insert({
         name: newService.name,
         description: newService.description,
-        base_price: parseInt(newService.base_price),
+        base_price: Math.round(parseFloat(newService.base_price) * 100),
         discount_percentage: parseInt(newService.discount_percentage.toString()) || 0,
         offer_text: newService.offer_text,
         category_id: newService.category_id,
@@ -127,7 +127,7 @@ export default function AdminDashboard() {
     setNewService({
       name: service.name,
       description: service.description || '',
-      base_price: service.base_price.toString(),
+      base_price: (service.base_price / 100).toString(),
       category_id: service.category_id,
       is_active: service.is_active,
       discount_percentage: service.discount_percentage || 0,
