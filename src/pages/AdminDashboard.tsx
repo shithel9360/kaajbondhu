@@ -169,6 +169,25 @@ export default function AdminDashboard() {
     }
   };
 
+  
+  const handleUpdateBookingStatus = async (bookingId: string, newStatus: string) => {
+    if (!confirm('আপনি কি নিশ্চিত যে বুকিং স্ট্যাটাস পরিবর্তন করতে চান?')) return;
+    const { error } = await supabase.from('bookings').update({ status: newStatus }).eq('id', bookingId);
+    if (!error) {
+      toast.info('বুকিং স্ট্যাটাস আপডেট করা হয়েছে।');
+      setAllBookings(allBookings.map(b => b.id === bookingId ? { ...b, status: newStatus } : b));
+    } else toast.error('সমস্যা হয়েছে: ' + error.message);
+  };
+
+  const handleUpdatePaymentStatus = async (bookingId: string, newStatus: string) => {
+    if (!confirm('আপনি কি নিশ্চিত যে পেমেন্ট স্ট্যাটাস পরিবর্তন করতে চান?')) return;
+    const { error } = await supabase.from('bookings').update({ payment_status: newStatus }).eq('id', bookingId);
+    if (!error) {
+      toast.info('পেমেন্ট স্ট্যাটাস আপডেট করা হয়েছে।');
+      setAllBookings(allBookings.map(b => b.id === bookingId ? { ...b, payment_status: newStatus } : b));
+    } else toast.error('সমস্যা হয়েছে: ' + error.message);
+  };
+
   const handleCancelAdminBooking = async (bookingId: string) => {
     if (!confirm('আপনি কি নিশ্চিত যে বুকিংটি বাতিল করতে চান?')) return;
     const { error } = await supabase.from('bookings').update({ status: 'cancelled' }).eq('id', bookingId);
@@ -468,18 +487,37 @@ export default function AdminDashboard() {
                           {new Date(b.scheduled_at).toLocaleString('bn-BD')}
                         </td>
                         <td className="p-4">
-                          {b.status === 'pending' && <span className="inline-flex px-2 py-1 rounded-md text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">অপেক্ষমান</span>}
-                          {b.status === 'accepted' && <span className="inline-flex px-2 py-1 rounded-md text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">গৃহীত</span>}
-                          {b.status === 'ongoing' && <span className="inline-flex px-2 py-1 rounded-md text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">চলমান</span>}
-                          {b.status === 'completed' && <span className="inline-flex px-2 py-1 rounded-md text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">সম্পন্ন</span>}
-                          {b.status === 'cancelled' && <span className="inline-flex px-2 py-1 rounded-md text-xs font-bold bg-red-50 text-red-700 border border-red-200">বাতিল</span>}
+                          <select 
+                            value={b.status}
+                            onChange={(e) => handleUpdateBookingStatus(b.id, e.target.value)}
+                            className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-bold px-2 py-1 mb-2 block w-full"
+                          >
+                            <option value="pending">অপেক্ষমান</option>
+                            <option value="accepted">গৃহীত</option>
+                            <option value="ongoing">চলমান</option>
+                            <option value="completed">সম্পন্ন</option>
+                            <option value="cancelled">বাতিল</option>
+                          </select>
+                          
+                          <select 
+                            value={b.payment_status}
+                            onChange={(e) => handleUpdatePaymentStatus(b.id, e.target.value)}
+                            className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-bold px-2 py-1 block w-full"
+                          >
+                            <option value="pending">পেমেন্ট অপেক্ষমান</option>
+                            <option value="paid">পেমেন্ট সম্পন্ন</option>
+                            <option value="refunded">রিফান্ডেড</option>
+                          </select>
                         </td>
                         <td className="p-4 text-right">
-                          {(b.status === 'pending' || b.status === 'accepted') && (
-                            <Button size="sm" variant="destructive" onClick={() => handleCancelAdminBooking(b.id)}>
-                              <XCircle className="w-4 h-4 mr-1" /> বাতিল
-                            </Button>
-                          )}
+                          <div className="flex flex-col gap-2 items-end">
+                            <span className="text-sm font-bold text-slate-700 dark:text-slate-300">৳{b.total_price}</span>
+                            {(b.status === 'pending' || b.status === 'accepted') && (
+                              <Button size="sm" variant="destructive" onClick={() => handleCancelAdminBooking(b.id)}>
+                                <XCircle className="w-4 h-4 mr-1" /> বাতিল
+                              </Button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}
