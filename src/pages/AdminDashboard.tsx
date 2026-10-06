@@ -21,7 +21,7 @@ export default function AdminDashboard() {
   const [allBookings, setAllBookings] = useState<any[]>([]);
   const [selectedProviderDetail, setSelectedProviderDetail] = useState<any>(null);
   
-  const [newService, setNewService] = useState({ name: '', description: '', base_price: '', category_id: '', is_active: true });
+  const [newService, setNewService] = useState({ name: '', description: '', base_price: '', category_id: '', is_active: true, discount_percentage: 0, offer_text: '' });
   const [isAddingService, setIsAddingService] = useState(false);
   const [editModeId, setEditModeId] = useState<string | null>(null);
 
@@ -89,9 +89,12 @@ export default function AdminDashboard() {
         name: newService.name,
         description: newService.description,
         base_price: parseInt(newService.base_price),
+        discount_percentage: parseInt(newService.discount_percentage.toString()) || 0,
+        offer_text: newService.offer_text,
         category_id: newService.category_id,
         is_active: newService.is_active,
-        is_active: newService.is_active,
+        
+        
       }).eq('id', editModeId);
 
       if (!error) {
@@ -105,6 +108,8 @@ export default function AdminDashboard() {
         name: newService.name,
         description: newService.description,
         base_price: parseInt(newService.base_price),
+        discount_percentage: parseInt(newService.discount_percentage.toString()) || 0,
+        offer_text: newService.offer_text,
         category_id: newService.category_id,
         pricing_model: 'starting_at'
       });
@@ -124,7 +129,9 @@ export default function AdminDashboard() {
       description: service.description || '',
       base_price: service.base_price.toString(),
       category_id: service.category_id,
-      is_active: service.is_active
+      is_active: service.is_active,
+      discount_percentage: service.discount_percentage || 0,
+      offer_text: service.offer_text || ''
     });
     setEditModeId(service.id);
     setIsAddingService(true);
@@ -293,7 +300,7 @@ export default function AdminDashboard() {
                 <Server className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 <CardTitle className="text-xl">সার্ভিস ম্যানেজমেন্ট (CMS)</CardTitle>
               </div>
-              <Button onClick={() => { setIsAddingService(!isAddingService); setEditModeId(null); setNewService({ name: '', description: '', base_price: '', category_id: '', is_active: true }); }} className="mt-4 sm:mt-0 shadow-sm bg-slate-900 hover:bg-slate-800 text-white dark:bg-blue-600 dark:hover:bg-blue-700">
+              <Button onClick={() => { setIsAddingService(!isAddingService); setEditModeId(null); setNewService({ name: '', description: '', base_price: '', category_id: '', is_active: true, discount_percentage: 0, offer_text: '' }); }} className="mt-4 sm:mt-0 shadow-sm bg-slate-900 hover:bg-slate-800 text-white dark:bg-blue-600 dark:hover:bg-blue-700">
                 <Plus className="w-4 h-4 mr-2" />
                 নতুন সার্ভিস যোগ করুন
               </Button>
@@ -364,12 +371,19 @@ export default function AdminDashboard() {
                         </td>
                         <td className="p-4 font-bold text-blue-600 dark:text-blue-400">
                           {formatBDT(s.base_price)}
+                          {s.discount_percentage > 0 && <span className="block text-xs text-red-500 font-normal">-{s.discount_percentage}% ছাড়</span>}
                         </td>
-                        <td className="p-4 text-right">
+                        <td className="p-4 text-center">
                           {s.is_active ? 
                             <span className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">অ্যাকটিভ</span> : 
                             <span className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700">নিষ্ক্রিয়</span>
                           }
+                        </td>
+                        <td className="p-4 text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button size="sm" variant="outline" onClick={() => handleEditClick(s)}>এডিট</Button>
+                            <Button size="sm" variant="destructive" onClick={() => handleDeleteService(s.id)}>ডিলিট</Button>
+                          </div>
                         </td>
                       </tr>
                     ))}
