@@ -3,16 +3,28 @@ import { Link, useLocation } from 'react-router-dom';
 import { Button } from './ui/button';
 import { ModeToggle } from './mode-toggle';
 import { supabase } from '../lib/supabase';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, User, Settings, LogOut, LayoutDashboard } from 'lucide-react';
 
 export function Navbar() {
   const [session, setSession] = useState<any>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [userProfile, setUserProfile] = useState<any>(null);
   const location = useLocation();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      if (session?.user) {
+        supabase.from('profiles').select('full_name, avatar_url').eq('id', session.user.id).single().then(({data}) => {
+          if (data) setUserProfile(data);
+        });
+      }
+      if (session?.user) {
+        supabase.from('profiles').select('full_name, avatar_url').eq('id', session.user.id).single().then(({data}) => {
+          if (data) setUserProfile(data);
+        });
+      }
     });
 
     const {
@@ -27,6 +39,7 @@ export function Navbar() {
   // Close mobile menu on route change
   useEffect(() => {
     setIsMobileMenuOpen(false);
+    setIsProfileOpen(false);
   }, [location]);
 
   return (
@@ -55,11 +68,46 @@ export function Navbar() {
         <div className="hidden lg:flex items-center gap-4">
           <ModeToggle />
           {session ? (
-            <Link to="/dashboard">
-              <Button variant="outline" className="font-semibold border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-50">
-                ড্যাশবোর্ড
-              </Button>
-            </Link>
+            <div className="relative">
+              <button 
+                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-transform active:scale-95 overflow-hidden"
+              >
+                {userProfile?.avatar_url ? (
+                  <img src={userProfile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="font-bold text-slate-600 dark:text-slate-300">
+                    {userProfile?.full_name ? userProfile.full_name.charAt(0).toUpperCase() : <User className="w-5 h-5" />}
+                  </span>
+                )}
+              </button>
+              
+              {isProfileOpen && (
+                <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-100 dark:border-slate-800 py-2 z-50 animate-in fade-in slide-in-from-top-2">
+                  <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-800 mb-2">
+                    <p className="text-sm font-bold text-slate-900 dark:text-slate-50 truncate">{userProfile?.full_name || 'ইউজার'}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{session.user.email}</p>
+                  </div>
+                  <Link to="/dashboard" className="flex items-center px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                    <LayoutDashboard className="w-4 h-4 mr-3 text-slate-400" /> ড্যাশবোর্ড
+                  </Link>
+                  <Link to="/profile" className="flex items-center px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                    <Settings className="w-4 h-4 mr-3 text-slate-400" /> প্রোফাইল সেটিংস
+                  </Link>
+                  <div className="border-t border-slate-100 dark:border-slate-800 mt-2 pt-2">
+                    <button 
+                      onClick={async () => {
+                        await supabase.auth.signOut();
+                        window.location.href = '/login';
+                      }}
+                      className="w-full flex items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+                    >
+                      <LogOut className="w-4 h-4 mr-3" /> লগআউট
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           ) : (
             <>
               <Link to="/login">
@@ -80,11 +128,13 @@ export function Navbar() {
         <div className="flex lg:hidden items-center gap-2 sm:gap-4">
           <ModeToggle />
           {session ? (
-            <Link to="/dashboard">
-              <Button variant="outline" size="sm" className="font-semibold border-slate-200 dark:border-slate-700">
-                ড্যাশবোর্ড
-              </Button>
-            </Link>
+            <div className="flex gap-2">
+              <Link to="/dashboard">
+                <Button variant="outline" size="sm" className="font-semibold border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-50 bg-white dark:bg-slate-800">
+                  ড্যাশবোর্ড
+                </Button>
+              </Link>
+            </div>
           ) : (
             <Link to="/#services">
               <Button size="sm" className="font-bold bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 rounded-full">
@@ -116,6 +166,22 @@ export function Navbar() {
               <Link to="/signup" className="w-full">
                 <Button className="w-full justify-center bg-blue-600 hover:bg-blue-700 text-white">রেজিস্টার</Button>
               </Link>
+            </div>
+          )}
+          {session && (
+            <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-2">
+              <Link to="/profile" className="text-base font-medium text-slate-700 dark:text-slate-200 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center">
+                <Settings className="w-5 h-5 mr-3 text-slate-400" /> প্রোফাইল সেটিংস
+              </Link>
+              <button 
+                onClick={async () => {
+                  await supabase.auth.signOut();
+                  window.location.href = '/login';
+                }}
+                className="text-base font-medium text-red-600 dark:text-red-400 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/10 flex items-center w-full text-left"
+              >
+                <LogOut className="w-5 h-5 mr-3" /> লগআউট
+              </button>
             </div>
           )}
         </div>

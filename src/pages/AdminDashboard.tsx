@@ -39,7 +39,11 @@ export default function AdminDashboard() {
       // Load stats
       const { count: usersCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
       const { count: bookingsCount } = await supabase.from('bookings').select('*', { count: 'exact', head: true });
-      setStats({ users: usersCount || 0, bookings: bookingsCount || 0, platformIncome: 25500 }); // Mock income for MVP
+      // Calculate real platform income
+      const { data: incomeData } = await supabase.from('bookings').select('platform_fee').eq('status', 'completed');
+      const realIncome = incomeData ? incomeData.reduce((acc, curr) => acc + (curr.platform_fee || 0), 0) : 0;
+      
+      setStats({ users: usersCount || 0, bookings: bookingsCount || 0, platformIncome: realIncome });
 
       // Load CMS data
       const { data: catData } = await supabase.from('categories').select('*').is('archived_at', null);
