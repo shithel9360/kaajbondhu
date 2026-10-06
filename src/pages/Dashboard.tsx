@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
@@ -100,7 +101,7 @@ export default function Dashboard() {
     const ratingObj = ratingInput[bookingId] || { rating: 5, comment: '' };
     
     if (ratingObj.rating < 1 || ratingObj.rating > 5) {
-      alert("১ থেকে ৫ এর মধ্যে রেটিং দিন।");
+      toast.info("১ থেকে ৫ এর মধ্যে রেটিং দিন।");
       return;
     }
 
@@ -111,10 +112,10 @@ export default function Dashboard() {
     const { error } = await supabase.from('bookings').update(updateData).eq('id', bookingId);
     
     if (!error) {
-      alert('রেটিং সফলভাবে জমা দেওয়া হয়েছে!');
+      toast.info('রেটিং সফলভাবে জমা দেওয়া হয়েছে!');
       fetchData();
     } else {
-      alert('রেটিং জমা দিতে সমস্যা হয়েছে: ' + error.message);
+      toast.info('রেটিং জমা দিতে সমস্যা হয়েছে: ' + error.message);
     }
   };
 
@@ -125,9 +126,9 @@ export default function Dashboard() {
       p_provider_id: user.id
     });
     if (!error) {
-      alert('কাজটি সফলভাবে গ্রহণ করা হয়েছে!');
+      toast.info('কাজটি সফলভাবে গ্রহণ করা হয়েছে!');
       fetchData();
-    } else alert(error.message);
+    } else toast.info(error.message);
   };
   const generateOTP = async (bookingId: string) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -140,9 +141,18 @@ export default function Dashboard() {
     const booking = bookings.find(b => b.id === bookingId);
     if (booking?.otp_code === code) {
       const { error } = await supabase.from('bookings').update({ status: 'ongoing', otp_verified_at: new Date().toISOString() }).eq('id', bookingId);
-      if (!error) { alert('OTP ভেরিফাই সফল! কাজ শুরু করুন।'); fetchData(); }
-    } else alert('ভুল OTP!');
+      if (!error) { toast.info('OTP ভেরিফাই সফল! কাজ শুরু করুন।'); fetchData(); }
+    } else toast.info('ভুল OTP!');
   };
+  const cancelBooking = async (bookingId: string) => {
+    if (!confirm('আপনি কি নিশ্চিত যে বুকিংটি বাতিল করতে চান?')) return;
+    const { error } = await supabase.from('bookings').update({ status: 'cancelled' }).eq('id', bookingId);
+    if (!error) {
+      toast.info('বুকিং বাতিল করা হয়েছে।');
+      fetchData();
+    }
+  };
+
   const completeBooking = async (bookingId: string) => {
     if (!confirm('আপনি কি নিশ্চিত যে কাজ সম্পন্ন হয়েছে?')) return;
     const { error } = await supabase.from('bookings').update({ status: 'completed' }).eq('id', bookingId);
@@ -153,7 +163,7 @@ export default function Dashboard() {
     const confirmReal = window.confirm(`AamarPay Payment Gateway integration is strictly BLOCKED pending Server Configuration.\n\nWould you like to process a Demo/Test Payment instead?`);
     if(confirmReal) {
       await supabase.from('bookings').update({ payment_status: 'paid' }).eq('id', id);
-      alert("Demo Payment Successful!");
+      toast.info("Demo Payment Successful!");
       fetchData();
     }
   };
@@ -388,6 +398,10 @@ export default function Dashboard() {
                         <Button className="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white shadow-sm" onClick={() => completeBooking(b.id)}>কাজ সম্পন্ন করুন</Button>
                       )}
 
+                      {role === 'customer' && b.status === 'pending' && (
+                        <Button className="w-full md:w-auto shadow-sm" variant="destructive" onClick={() => cancelBooking(b.id)}>বাতিল করুন</Button>
+                      )}
+                      
                       {role === 'customer' && b.status === 'completed' && b.payment_status === 'pending' && (
                         <Button className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white shadow-md" onClick={() => handlePayment(b.id, b.total_price)}>পেমেন্ট করুন</Button>
                       )}

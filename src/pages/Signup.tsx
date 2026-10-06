@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
@@ -33,7 +34,7 @@ export default function Signup() {
     if (error) {
       setError(error.message);
     } else {
-      alert('সফলভাবে একাউন্ট তৈরি হয়েছে! দয়া করে লগইন করুন।');
+      toast.info('সফলভাবে একাউন্ট তৈরি হয়েছে! দয়া করে লগইন করুন।');
       navigate('/login');
     }
     setLoading(false);

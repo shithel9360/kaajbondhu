@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
@@ -17,6 +18,7 @@ export default function AdminDashboard() {
   const [services, setServices] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [providers, setProviders] = useState<any[]>([]);
+  const [allBookings, setAllBookings] = useState<any[]>([]);
   
   const [newService, setNewService] = useState({ name: '', description: '', base_price: '', category_id: '', is_active: true });
   const [isAddingService, setIsAddingService] = useState(false);
@@ -52,8 +54,12 @@ export default function AdminDashboard() {
       const { data: srvData } = await supabase.from('services').select('*, categories(name)').is('archived_at', null);
       if (srvData) setServices(srvData);
 
-      // Load provider applications (Manually matching profiles with provider_profiles)
+      // Load provider applications
       const { data: provData } = await supabase.from('provider_profiles').select('*').order('created_at', { ascending: false });
+      
+      // Load all bookings for CMS
+      const { data: bookingsList } = await supabase.from('bookings').select('*, services(name), customer:customer_id(full_name, phone_number)').order('created_at', { ascending: false });
+      if (bookingsList) setAllBookings(bookingsList);
       
       const { data: skillsData } = await supabase.from('provider_skills').select('provider_id, experience_years, categories(name)');
       
@@ -88,10 +94,10 @@ export default function AdminDashboard() {
       }).eq('id', editModeId);
 
       if (!error) {
-        alert('সার্ভিস সফলভাবে আপডেট করা হয়েছে!');
+        toast.info('সার্ভিস সফলভাবে আপডেট করা হয়েছে!');
         window.location.reload();
       } else {
-        alert('সমস্যা হয়েছে: ' + error.message);
+        toast.info('সমস্যা হয়েছে: ' + error.message);
       }
     } else {
       const { error } = await supabase.from('services').insert({
@@ -103,10 +109,10 @@ export default function AdminDashboard() {
       });
 
       if (!error) {
-        alert('সার্ভিস সফলভাবে যোগ করা হয়েছে!');
+        toast.info('সার্ভিস সফলভাবে যোগ করা হয়েছে!');
         window.location.reload();
       } else {
-        alert('সমস্যা হয়েছে: ' + error.message);
+        toast.info('সমস্যা হয়েছে: ' + error.message);
       }
     }
   };
@@ -129,10 +135,10 @@ export default function AdminDashboard() {
     
     const { error } = await supabase.from('services').update({ archived_at: new Date().toISOString() }).eq('id', serviceId);
     if (!error) {
-      alert('সার্ভিস মুছে ফেলা হয়েছে।');
+      toast.info('সার্ভিস মুছে ফেলা হয়েছে।');
       window.location.reload();
     } else {
-      alert('সমস্যা হয়েছে: ' + error.message);
+      toast.info('সমস্যা হয়েছে: ' + error.message);
     }
   };
 
@@ -144,7 +150,7 @@ export default function AdminDashboard() {
       .eq('id', providerId);
       
     if (updateError) {
-      alert('স্ট্যাটাস আপডেট করতে সমস্যা: ' + updateError.message);
+      toast.info('স্ট্যাটাস আপডেট করতে সমস্যা: ' + updateError.message);
       return;
     }
 
@@ -154,11 +160,20 @@ export default function AdminDashboard() {
       .upsert({ user_id: providerId, role: 'provider' });
 
     if (roleError) {
-      alert('রোল আপডেটে সমস্যা: ' + roleError.message);
+      toast.info('রোল আপডেটে সমস্যা: ' + roleError.message);
     } else {
-      alert('প্রোভাইডার সফলভাবে ভেরিফাই করা হয়েছে!');
+      toast.info('প্রোভাইডার সফলভাবে ভেরিফাই করা হয়েছে!');
       // Refresh local state
       setProviders(providers.map(p => p.id === providerId ? { ...p, status: 'approved' } : p));
+    }
+  };
+
+  const handleCancelAdminBooking = async (bookingId: string) => {
+    if (!confirm('আপনি কি নিশ্চিত যে বুকিংটি বাতিল করতে চান?')) return;
+    const { error } = await supabase.from('bookings').update({ status: 'cancelled' }).eq('id', bookingId);
+    if (!error) {
+      toast.info('বুকিং বাতিল করা হয়েছে।');
+      window.location.reload();
     }
   };
 
@@ -172,7 +187,7 @@ export default function AdminDashboard() {
       .eq('id', providerId);
 
     if (!error) {
-      alert('আবেদন বাতিল করা হয়েছে।');
+      toast.info('আবেদন বাতিল করা হয়েছে।');
       setProviders(providers.map(p => p.id === providerId ? { ...p, status: 'rejected', rejection_reason: reason } : p));
     }
   };
@@ -202,6 +217,12 @@ export default function AdminDashboard() {
             className={`px-4 py-2 text-sm font-bold rounded-lg transition-colors ${activeTab === 'providers' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400' : 'text-slate-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-700'}`}
           >
             প্রোভাইডার ভেরিফিকেশন
+          </button>
+          <button 
+            onClick={() => setActiveTab('bookings')} 
+            className={`px-4 py-2 text-sm font-bold rounded-lg transition-colors ${activeTab === 'bookings' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400' : 'text-slate-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-700'}`}
+          >
+            বুকিং ম্যানেজমেন্ট
           </button>
         </div>
       </div>
@@ -403,6 +424,69 @@ export default function AdminDashboard() {
                 {providers.length === 0 && (
                   <div className="p-8 text-center text-slate-500">
                     কোনো প্রোভাইডার অ্যাপ্লিকেশন নেই।
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    {activeTab === 'bookings' && (
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <Card className="shadow-sm border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-50">
+            <CardHeader className="border-b border-slate-100 dark:border-slate-700 pb-4">
+              <div className="flex items-center gap-2">
+                <Activity className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                <CardTitle className="text-xl">সকল বুকিং তালিকা</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-600 dark:text-slate-400">
+                      <th className="p-4">বুকিং আইডি ও সার্ভিস</th>
+                      <th className="p-4">কাস্টমার তথ্য</th>
+                      <th className="p-4">তারিখ ও সময়</th>
+                      <th className="p-4">স্ট্যাটাস</th>
+                      <th className="p-4 text-right">অ্যাকশন</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+                    {allBookings.map(b => (
+                      <tr key={b.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                        <td className="p-4">
+                          <p className="font-bold text-slate-900 dark:text-slate-100">{b.services?.name}</p>
+                          <p className="text-xs text-slate-500 font-mono">ID: {b.id.substring(0,8)}...</p>
+                        </td>
+                        <td className="p-4">
+                          <p className="font-bold text-slate-700 dark:text-slate-300 text-sm">{b.customer?.full_name || 'অজানা'}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">{b.customer?.phone_number || b.address}</p>
+                        </td>
+                        <td className="p-4 text-slate-600 dark:text-slate-400 text-sm">
+                          {new Date(b.scheduled_at).toLocaleString('bn-BD')}
+                        </td>
+                        <td className="p-4">
+                          {b.status === 'pending' && <span className="inline-flex px-2 py-1 rounded-md text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">অপেক্ষমান</span>}
+                          {b.status === 'accepted' && <span className="inline-flex px-2 py-1 rounded-md text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">গৃহীত</span>}
+                          {b.status === 'ongoing' && <span className="inline-flex px-2 py-1 rounded-md text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">চলমান</span>}
+                          {b.status === 'completed' && <span className="inline-flex px-2 py-1 rounded-md text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">সম্পন্ন</span>}
+                          {b.status === 'cancelled' && <span className="inline-flex px-2 py-1 rounded-md text-xs font-bold bg-red-50 text-red-700 border border-red-200">বাতিল</span>}
+                        </td>
+                        <td className="p-4 text-right">
+                          {(b.status === 'pending' || b.status === 'accepted') && (
+                            <Button size="sm" variant="destructive" onClick={() => handleCancelAdminBooking(b.id)}>
+                              <XCircle className="w-4 h-4 mr-1" /> বাতিল
+                            </Button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {allBookings.length === 0 && (
+                  <div className="p-8 text-center text-slate-500">
+                    কোনো বুকিং নেই।
                   </div>
                 )}
               </div>

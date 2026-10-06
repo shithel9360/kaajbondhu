@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
@@ -59,7 +60,7 @@ export default function BookService() {
 
   const handleBooking = async () => {
     if (!address || !date || !position) {
-      alert('অনুগ্রহ করে তারিখ এবং ম্যাপ থেকে ঠিকানা নির্বাচন করুন।');
+      toast.info('অনুগ্রহ করে তারিখ এবং ম্যাপ থেকে ঠিকানা নির্বাচন করুন।');
       return;
     }
 
@@ -67,14 +68,14 @@ export default function BookService() {
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
-      alert('বুকিং করতে লগইন করুন');
+      toast.info('বুকিং করতে লগইন করুন');
       navigate('/login');
       return;
     }
 
     const { data: roleData } = await supabase.from('user_roles').select('role').eq('user_id', user.id).single();
     if (roleData?.role !== 'customer') {
-      alert('শুধুমাত্র গ্রাহকরা বুকিং করতে পারবেন।');
+      toast.info('শুধুমাত্র গ্রাহকরা বুকিং করতে পারবেন।');
       setLoading(false);
       return;
     }
@@ -97,9 +98,9 @@ export default function BookService() {
     setLoading(false);
 
     if (error) {
-      alert('বুকিং ব্যর্থ হয়েছে: ' + error.message);
+      toast.info('বুকিং ব্যর্থ হয়েছে: ' + error.message);
     } else {
-      alert('আপনার বুকিং সফলভাবে গ্রহণ করা হয়েছে!');
+      toast.info('আপনার বুকিং সফলভাবে গ্রহণ করা হয়েছে!');
       navigate('/dashboard');
     }
   };

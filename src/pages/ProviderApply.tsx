@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
@@ -54,7 +55,7 @@ export default function ProviderApply() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.category_id) {
-      alert('দয়া করে একটি কাজের ধরণ (Category) নির্বাচন করুন।');
+      toast.info('দয়া করে একটি কাজের ধরণ (Category) নির্বাচন করুন।');
       return;
     }
     setLoading(true);
@@ -76,7 +77,7 @@ export default function ProviderApply() {
       });
 
       if (profileError) {
-        alert('সমস্যা হয়েছে (Profile): ' + profileError.message);
+        toast.info('সমস্যা হয়েছে (Profile): ' + profileError.message);
         setLoading(false);
         return;
       }
@@ -93,7 +94,7 @@ export default function ProviderApply() {
         // We won't block the UI for skill error, it's non-fatal if they somehow already have it, but we log it.
       }
 
-      alert('আপনার আবেদন সফলভাবে জমা দেওয়া হয়েছে! অ্যাডমিন অ্যাপ্রুভালের জন্য অপেক্ষা করুন।');
+      toast.info('আপনার আবেদন সফলভাবে জমা দেওয়া হয়েছে! অ্যাডমিন অ্যাপ্রুভালের জন্য অপেক্ষা করুন।');
       navigate('/dashboard');
     }
     setLoading(false);

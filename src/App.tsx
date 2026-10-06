@@ -10,6 +10,7 @@ import Profile from './pages/Profile';
 import { ThemeProvider } from './components/theme-provider';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
+import { Toaster } from 'sonner';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
             </Routes>
           </main>
           <Footer />
+          <Toaster position="top-center" richColors />
         </div>
       </Router>
     </ThemeProvider>

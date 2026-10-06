@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -76,9 +77,9 @@ export default function Profile() {
 
     if (error) {
       if (error.message.includes('bkash_number') || error.message.includes('bank_account')) {
-         alert('সিস্টেমে ব্যাংক/বিকাশ কলাম এখনো তৈরি হয়নি। দয়া করে অ্যাডমিনকে Supabase-এ bkash_number এবং bank_account কলাম যোগ করতে বলুন।');
+         toast.info('সিস্টেমে ব্যাংক/বিকাশ কলাম এখনো তৈরি হয়নি। দয়া করে অ্যাডমিনকে Supabase-এ bkash_number এবং bank_account কলাম যোগ করতে বলুন।');
       } else {
-         alert('প্রোফাইল আপডেট করতে সমস্যা হয়েছে: ' + error.message);
+         toast.info('প্রোফাইল আপডেট করতে সমস্যা হয়েছে: ' + error.message);
       }
     } else {
       setSuccess(true);
