@@ -42,11 +42,12 @@ export default function Dashboard() {
     setRole(userRole);
 
     if (userRole === 'customer') {
-      const { data: bookingsData } = await supabase
+      const { data: bookingsData, error: bErr } = await supabase
         .from('bookings')
         .select(`*, services ( name, base_price, pricing_model )`)
         .eq('customer_id', user.id)
         .order('created_at', { ascending: false });
+      if (bErr) console.error('Dashboard Bookings Error:', bErr);
       if (bookingsData) setBookings(bookingsData);
 
       const { data: profile } = await supabase.from('profiles').select('average_rating, total_reviews').eq('id', user.id).maybeSingle();
