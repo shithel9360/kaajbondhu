@@ -35,6 +35,16 @@
   --radius-sm: calc(var(--radius) - 4px);
 }
 
+html { scroll-behavior: smooth; }
+
+::selection {
+  background: hsla(243, 75%, 59%, 0.3);
+  color: inherit;
+}
+.dark ::selection {
+  background: hsla(243, 75%, 69%, 0.3);
+}
+
 @layer base {
   :root {
     --background: 210 40% 98%;
@@ -95,6 +105,14 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Premium subtle noise/gradient mesh effect */
+    background-image: radial-gradient(at 0% 0%, hsla(240, 100%, 95%, 0.5) 0px, transparent 50%),
+                      radial-gradient(at 100% 0%, hsla(200, 100%, 95%, 0.5) 0px, transparent 50%);
+    background-attachment: fixed;
+  }
+  .dark body {
+    background-image: radial-gradient(at 0% 0%, hsla(240, 50%, 10%, 1) 0px, transparent 50%),
+                      radial-gradient(at 100% 0%, hsla(200, 50%, 10%, 1) 0px, transparent 50%);
   }
 }
 

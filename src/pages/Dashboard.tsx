@@ -44,7 +44,7 @@ export default function Dashboard() {
     if (userRole === 'customer') {
       const { data: bookingsData, error: bErr } = await supabase
         .from('bookings')
-        .select(`*, services ( name, base_price, pricing_model )`)
+        .select(`*, services ( name, base_price, pricing_model ), assignments ( provider_id, status, profiles!assignments_provider_profile_fkey ( id, full_name, phone_number, avatar_url, average_rating, total_reviews ) ), booking_secrets ( otp_code )`)
         .eq('customer_id', user.id)
         .order('created_at', { ascending: false });
       if (bErr) console.error('Dashboard Bookings Error:', bErr);
@@ -131,18 +131,20 @@ export default function Dashboard() {
     } else toast.info(error.message);
   };
   const generateOTP = async (bookingId: string) => {
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const { error } = await supabase.from('bookings').update({ otp_code: otp, otp_expires_at: new Date(Date.now() + 15*60000).toISOString() }).eq('id', bookingId);
-    if (!error) fetchData();
+    const { error } = await supabase.rpc('generate_booking_otp', { target_booking_id: bookingId });
+    if (!error) {
+      toast.info('OTP কাস্টমারকে পাঠানো হয়েছে।');
+      fetchData();
+    } else toast.error('OTP জেনারেট করতে সমস্যা হয়েছে: ' + error.message);
   };
   const verifyOTP = async (bookingId: string) => {
     const code = prompt('কাস্টমারের কাছ থেকে প্রাপ্ত ৬-ডিজিটের OTP লিখুন:');
     if (!code) return;
-    const booking = bookings.find(b => b.id === bookingId);
-    if (booking?.otp_code === code) {
-      const { error } = await supabase.from('bookings').update({ status: 'ongoing', otp_verified_at: new Date().toISOString() }).eq('id', bookingId);
-      if (!error) { toast.info('OTP ভেরিফাই সফল! কাজ শুরু করুন।'); fetchData(); }
-    } else toast.info('ভুল OTP!');
+    const { error } = await supabase.rpc('verify_booking_otp', { target_booking_id: bookingId, submitted_otp: code });
+    if (!error) {
+      toast.info('OTP ভেরিফাই সফল! কাজ শুরু করুন।');
+      fetchData();
+    } else toast.error('ভুল OTP বা ভেরিফাই করতে সমস্যা হয়েছে!');
   };
   const cancelBooking = async (bookingId: string) => {
     if (!confirm('আপনি কি নিশ্চিত যে বুকিংটি বাতিল করতে চান?')) return;
@@ -323,7 +325,7 @@ export default function Dashboard() {
                     <div className="mb-4 md:mb-0 space-y-2 flex-1">
                       <div className="flex items-center gap-3">
                         <p className="font-bold text-xl text-slate-900 dark:text-slate-50">{b.services?.name}</p>
-                        <StatusBadge status={b.status} type="booking" />
+                        <StatusBadge status={b.status} type="booking" detailed={true} />
                         <StatusBadge status={b.payment_status} type="payment" />
                       </div>
                       
@@ -337,7 +339,7 @@ export default function Dashboard() {
                       {role === 'customer' && b.otp_code && b.status === 'accepted' && (
                         <div className="mt-3 inline-block bg-red-50 border border-red-200 rounded-lg p-3 dark:bg-red-900/20 dark:border-red-800">
                           <p className="text-red-700 dark:text-red-400 font-bold text-sm mb-1">প্রোভাইডারকে এই OTP দিন</p>
-                          <p className="text-3xl font-mono text-red-600 dark:text-red-300 tracking-widest">{b.otp_code}</p>
+                          <p className="text-3xl font-mono text-red-600 dark:text-red-300 tracking-widest">{b.booking_secrets && b.booking_secrets.length > 0 ? b.booking_secrets[0].otp_code : b.otp_code}</p>
                         </div>
                       )}
 

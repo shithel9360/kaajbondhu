@@ -333,7 +333,7 @@ export default function Home() {
                 </p>
                 <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
                   <Link to="/#services" className="w-full sm:w-auto">
-                    <Button size="lg" className="w-full sm:w-auto h-16 px-12 text-lg font-bold bg-slate-900 text-white hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-2xl shadow-xl transition-transform hover:-translate-y-1">
+                    <Button size="lg" className="w-full sm:w-auto h-16 px-12 text-lg font-bold bg-slate-900 text-white hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-500 rounded-2xl shadow-[0_20px_40px_rgb(0,0,0,0.2)] dark:shadow-[0_20px_40px_rgb(37,99,235,0.2)] transition-all hover:-translate-y-1 hover:scale-105">
                       Book A Service Now
                     </Button>
                   </Link>

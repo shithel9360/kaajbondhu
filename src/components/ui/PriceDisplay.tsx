@@ -1,4 +1,5 @@
 import React from 'react';
+import { Clock, Search, CheckCircle, PlayCircle, XCircle, AlertCircle, CreditCard, CheckCircle2, ShieldCheck, Banknote } from 'lucide-react';
 
 interface PriceDisplayProps {
   amountPoisha: number;
@@ -78,31 +79,96 @@ export const PriceDisplay: React.FC<PriceDisplayProps> = ({
   );
 };
 
-export const StatusBadge: React.FC<{ status: string, type?: 'booking' | 'payment' }> = ({ status, type = 'booking' }) => {
+export const StatusBadge: React.FC<{ status: string, type?: 'booking' | 'payment', detailed?: boolean }> = ({ status, type = 'booking', detailed = false }) => {
   let bg = 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700';
   let label = status;
+  let Icon = AlertCircle;
+  let description = '';
 
   if (type === 'booking') {
     switch (status) {
-      case 'pending': bg = 'bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800'; label = 'অপেক্ষমান'; break;
-      case 'matching': bg = 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800'; label = 'ম্যাচিং হচ্ছে'; break;
-      case 'accepted': bg = 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800'; label = 'গৃহীত'; break;
-      case 'ongoing': bg = 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800'; label = 'চলমান'; break;
-      case 'completed': bg = 'bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'; label = 'সম্পন্ন'; break;
-      case 'cancelled': bg = 'bg-red-50 text-red-600 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800'; label = 'বাতিল'; break;
+      case 'pending': 
+        bg = 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800'; 
+        label = 'অপেক্ষমাণ'; 
+        Icon = Clock;
+        description = 'আপনার বুকিংটি গ্রহণ করার জন্য অপেক্ষা করা হচ্ছে';
+        break;
+      case 'matching': 
+        bg = 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800'; 
+        label = 'প্রোভাইডার খোঁজা হচ্ছে'; 
+        Icon = Search;
+        description = 'আপনার কাজের জন্য সঠিক প্রোভাইডার খোঁজা হচ্ছে';
+        break;
+      case 'accepted': 
+        bg = 'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-900/20 dark:text-indigo-400 dark:border-indigo-800'; 
+        label = 'কাজটি গৃহীত'; 
+        Icon = ShieldCheck;
+        description = 'প্রোভাইডার আপনার কাজটি গ্রহণ করেছেন';
+        break;
+      case 'ongoing': 
+        bg = 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800'; 
+        label = 'চলমান'; 
+        Icon = PlayCircle;
+        description = 'প্রোভাইডার বর্তমানে কাজ করছেন';
+        break;
+      case 'completed': 
+        bg = 'bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-900/20 dark:text-teal-400 dark:border-teal-800'; 
+        label = 'সম্পূর্ণ'; 
+        Icon = CheckCircle2;
+        description = 'কাজটি সফলভাবে সম্পন্ন হয়েছে';
+        break;
+      case 'cancelled': 
+        bg = 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800'; 
+        label = 'বাতিল'; 
+        Icon = XCircle;
+        description = 'বুকিংটি বাতিল করা হয়েছে';
+        break;
     }
   } else {
     switch (status) {
-      case 'pending': bg = 'bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800'; label = 'পেমেন্ট অপেক্ষমান'; break;
-      case 'authorized': bg = 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800'; label = 'অথোরাইজড'; break;
-      case 'paid': bg = 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800'; label = 'পরিশোধিত'; break;
-      case 'failed': bg = 'bg-red-50 text-red-600 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800'; label = 'পেমেন্ট ব্যর্থ'; break;
-      case 'refunded': bg = 'bg-orange-50 text-orange-600 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-800'; label = 'রিফান্ডেড'; break;
+      case 'pending': 
+        bg = 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800'; 
+        label = 'পেমেন্ট অপেক্ষমাণ'; 
+        Icon = CreditCard;
+        break;
+      case 'authorized': 
+        bg = 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800'; 
+        label = 'অথোরাইজড'; 
+        Icon = ShieldCheck;
+        break;
+      case 'paid': 
+        bg = 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800'; 
+        label = 'পরিশোধিত'; 
+        Icon = Banknote;
+        break;
+      case 'failed': 
+        bg = 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800'; 
+        label = 'পেমেন্ট ব্যর্থ'; 
+        Icon = XCircle;
+        break;
+      case 'refunded': 
+        bg = 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-800'; 
+        label = 'রিফান্ডেড'; 
+        Icon = ShieldCheck;
+        break;
     }
   }
 
+  if (detailed) {
+    return (
+      <div className={`flex items-start gap-3 p-3 rounded-lg border shadow-sm ${bg}`}>
+        <Icon className="w-5 h-5 mt-0.5 opacity-80" />
+        <div>
+          <p className="font-bold text-sm">{label}</p>
+          {description && <p className="text-xs mt-0.5 opacity-90">{description}</p>}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border shadow-sm ${bg}`}>
+    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border shadow-sm ${bg}`}>
+      <Icon className="w-3.5 h-3.5" />
       {label}
     </span>
   );

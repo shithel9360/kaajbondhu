@@ -153,7 +153,7 @@ export function Navbar() {
 
       {/* Mobile Menu Dropdown */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden absolute top-full left-0 w-full bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-xl animate-in slide-in-from-top-2 flex flex-col p-4 gap-4">
+        <div className="lg:hidden absolute top-[calc(100%+12px)] left-0 w-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 rounded-2xl shadow-2xl animate-in slide-in-from-top-4 flex flex-col p-4 gap-4">
           <Link to="/" className="text-base font-medium text-slate-700 dark:text-slate-200 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800">হোম</Link>
           <a href="/#services" className="text-base font-medium text-slate-700 dark:text-slate-200 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800">সার্ভিস সমূহ</a>
           <a href="/#how-it-works" className="text-base font-medium text-slate-700 dark:text-slate-200 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800">কীভাবে কাজ করে</a>

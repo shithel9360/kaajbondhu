@@ -166,12 +166,12 @@ export default function AdminDashboard() {
     // 2. Grant role
     const { error: roleError } = await supabase
       .from('user_roles')
-      .upsert({ user_id: providerId, role: 'provider' });
+      .upsert({ user_id: providerId, role: 'provider' }, { onConflict: 'user_id' });
 
     if (roleError) {
-      toast.info('রোল আপডেটে সমস্যা: ' + roleError.message);
+      toast.error('রোল আপডেটে সমস্যা: ' + roleError.message);
     } else {
-      toast.info('প্রোভাইডার সফলভাবে ভেরিফাই করা হয়েছে!');
+      toast.success('প্রোভাইডার সফলভাবে ভেরিফাই করা হয়েছে!');
       // Refresh local state
       setProviders(providers.map(p => p.id === providerId ? { ...p, status: 'approved' } : p));
     }
@@ -180,20 +180,22 @@ export default function AdminDashboard() {
   
   const handleUpdateBookingStatus = async (bookingId: string, newStatus: string) => {
     if (!confirm('আপনি কি নিশ্চিত যে বুকিং স্ট্যাটাস পরিবর্তন করতে চান?')) return;
-    const { error } = await supabase.from('bookings').update({ status: newStatus }).eq('id', bookingId);
-    if (!error) {
+    const { data, error } = await supabase.from('bookings').update({ status: newStatus }).eq('id', bookingId).select();
+    if (error) toast.error('সমস্যা হয়েছে: ' + error.message);
+    else if (data && data.length > 0) {
       toast.info('বুকিং স্ট্যাটাস আপডেট করা হয়েছে।');
       setAllBookings(allBookings.map(b => b.id === bookingId ? { ...b, status: newStatus } : b));
-    } else toast.error('সমস্যা হয়েছে: ' + error.message);
+    } else toast.error('আপডেট ব্যর্থ হয়েছে (অনুমতি নেই)।');
   };
 
   const handleUpdatePaymentStatus = async (bookingId: string, newStatus: string) => {
     if (!confirm('আপনি কি নিশ্চিত যে পেমেন্ট স্ট্যাটাস পরিবর্তন করতে চান?')) return;
-    const { error } = await supabase.from('bookings').update({ payment_status: newStatus }).eq('id', bookingId);
-    if (!error) {
+    const { data, error } = await supabase.from('bookings').update({ payment_status: newStatus }).eq('id', bookingId).select();
+    if (error) toast.error('সমস্যা হয়েছে: ' + error.message);
+    else if (data && data.length > 0) {
       toast.info('পেমেন্ট স্ট্যাটাস আপডেট করা হয়েছে।');
       setAllBookings(allBookings.map(b => b.id === bookingId ? { ...b, payment_status: newStatus } : b));
-    } else toast.error('সমস্যা হয়েছে: ' + error.message);
+    } else toast.error('আপডেট ব্যর্থ হয়েছে (অনুমতি নেই)।');
   };
 
   const handleCancelAdminBooking = async (bookingId: string) => {
@@ -225,30 +227,30 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="flex-1 p-4 md:p-8 space-y-8 bg-slate-50 dark:bg-slate-900 transition-colors">
+    <div className="flex-1 p-4 md:p-8 lg:p-12 space-y-8 bg-transparent transition-colors min-h-screen">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-slate-50">অ্যাডমিন প্যানেল</h1>
+          <h1 className="text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-500 dark:from-white dark:to-slate-400">অ্যাডমিন প্যানেল</h1>
           <p className="text-slate-500 dark:text-slate-400 mt-1">প্ল্যাটফর্ম ওভারভিউ এবং ম্যানেজমেন্ট</p>
         </div>
         
         {/* Custom Tabs */}
-        <div className="flex bg-white dark:bg-slate-800 p-1 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+        <div className="flex bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl p-1.5 rounded-2xl shadow-sm border border-white/50 dark:border-slate-700/50">
           <button 
             onClick={() => setActiveTab('overview')} 
-            className={`px-4 py-2 text-sm font-bold rounded-lg transition-colors ${activeTab === 'overview' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400' : 'text-slate-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-700'}`}
+            className={`px-4 py-2 text-sm font-bold rounded-lg transition-colors ${activeTab === 'overview' ? 'bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'}`}
           >
             ওভারভিউ
           </button>
           <button 
             onClick={() => setActiveTab('providers')} 
-            className={`px-4 py-2 text-sm font-bold rounded-lg transition-colors ${activeTab === 'providers' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400' : 'text-slate-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-700'}`}
+            className={`px-4 py-2 text-sm font-bold rounded-lg transition-colors ${activeTab === 'providers' ? 'bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'}`}
           >
             প্রোভাইডার ভেরিফিকেশন
           </button>
           <button 
             onClick={() => setActiveTab('bookings')} 
-            className={`px-4 py-2 text-sm font-bold rounded-lg transition-colors ${activeTab === 'bookings' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400' : 'text-slate-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-700'}`}
+            className={`px-4 py-2 text-sm font-bold rounded-lg transition-colors ${activeTab === 'bookings' ? 'bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'}`}
           >
             বুকিং ম্যানেজমেন্ট
           </button>
