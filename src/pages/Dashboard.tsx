@@ -122,8 +122,7 @@ export default function Dashboard() {
   // Remaining booking action functions (acceptWork, generateOTP, verifyOTP, completeBooking, handlePayment, handleLogout)
   const acceptWork = async (bookingId: string) => {
     const { error } = await supabase.rpc('accept_booking', {
-      p_booking_id: bookingId,
-      p_provider_id: user.id
+      target_booking_id: bookingId
     });
     if (!error) {
       toast.info('কাজটি সফলভাবে গ্রহণ করা হয়েছে!');
