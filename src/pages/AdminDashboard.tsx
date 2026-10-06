@@ -59,7 +59,7 @@ export default function AdminDashboard() {
       const { data: provData } = await supabase.from('provider_profiles').select('*').order('created_at', { ascending: false });
       
       // Load all bookings for CMS
-      const { data: bookingsList } = await supabase.from('bookings').select('*, services(name), customer:customer_id(full_name, phone_number)').order('created_at', { ascending: false });
+      const { data: bookingsList } = await supabase.from('bookings').select('*, services(name), customer:profiles(full_name, phone_number)').order('created_at', { ascending: false });
       if (bookingsList) setAllBookings(bookingsList);
       
       const { data: skillsData } = await supabase.from('provider_skills').select('provider_id, experience_years, categories(name)');
